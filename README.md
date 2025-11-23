@@ -13,3 +13,12 @@ This repo serves as the codebase for the CUDA C++ blogs series - storage and dev
 1. Allocation the array on GPU:
     - [source code](./blogs/1.Array_allocation_on_GPU/)
     - [blog](https://medium.com/@njarzynski15/alokacja-tablicy-na-gpu-9299ba16fa88)
+
+
+## Helpful tips:
+
+Simplest `kernel.cu` compilation:
+
+```
+nvcc kernel.cu -o kernel && chmod u+x ./kernel &&./kernel
+```
