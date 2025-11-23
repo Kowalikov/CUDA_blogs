@@ -1,48 +1,57 @@
-// /d:/Projects/CUDA/CG_decomposition/kernel.cu
-#include <cstdio>
-#include <cstdlib>
-#include <cuda_runtime.h>
+#include <iostream>                      
+#include <cuda_runtime.h>               // Główna biblioteka CUDA do zarządzania pamięcią i urządzeniem
+#include <device_launch_parameters.h>   // Parametry uruchamiania kernela (np. blockIdx, threadIdx)
 
-#define CUDA_CHECK(ans) { gpuAssert((ans), __FILE__, __LINE__); }
-inline void gpuAssert(cudaError_t code, const char *file, int line) {
-    if (code != cudaSuccess) {
-        fprintf(stderr, "CUDA Error: %s %s %d\n", cudaGetErrorString(code), file, line);
-        exit(EXIT_FAILURE);
-    }
-}
+// Kernel uruchamiany na GPU — każdy wątek podnosi jeden element tablicy do kwadratu
+__global__ void squareKernel(int* x, int n) {
+    // Obliczenie globalnego indeksu wątku w siatce
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
 
-__global__ void squareKernel(int *out, int n) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < n) {
-        int val = idx + 1; // first integers above zero: 1..n
-        out[idx] = val * val;
+    // Sprawdzenie, czy indeks mieści się w zakresie tablicy
+    if (i < n) {
+        x[i] = x[i] * x[i];  // Podniesienie wartości do kwadratu
     }
 }
 
 int main() {
-    const int N = 100;
+    const int size = 100;  // Rozmiar tablicy
+    int* host_x = new int[size];  // Dynamiczna alokacja pamięci na CPU (na stercie)
 
-    // Host array allocation
-    int *h_out = (int*)malloc(N * sizeof(int));
-    if (!h_out) return EXIT_FAILURE;
-    
-    // Device array allocation
-    int *d_out = nullptr;
-    CUDA_CHECK(cudaMalloc(&d_out, N * sizeof(int)));
+    // Inicjalizacja tablicy wartościami od 0 do 99
+    for (int i = 0; i < size; ++i)
+        host_x[i] = i;
 
-    int threadsPerBlock = 128;
-    int blocks = (N + threadsPerBlock - 1) / threadsPerBlock;
-    squareKernel<<<blocks, threadsPerBlock>>>(d_out, N);
-    CUDA_CHECK(cudaGetLastError());
-    CUDA_CHECK(cudaDeviceSynchronize());
+    // Alokacja pamięci na GPU (device)
+    int* device_x;
+    cudaMalloc(&device_x, size * sizeof(int));
 
-    CUDA_CHECK(cudaMemcpy(h_out, d_out, N * sizeof(int), cudaMemcpyDeviceToHost));
+    // Kopiowanie danych z CPU (host) do GPU (device)
+    cudaMemcpy(device_x, host_x, size * sizeof(int), cudaMemcpyHostToDevice);
 
-    for (int i = 0; i < N; ++i) {
-        printf("%d^2 = %d\n", i + 1, h_out[i]);
+    // Uruchomienie kernela: 20 bloków po 5 wątków = 100 wątków
+    squareKernel <<< 20, 5 >>> (device_x, size);
+
+    // Synchronizacja — czekamy aż GPU zakończy pracę
+    cudaDeviceSynchronize();
+
+    // Sprawdzenie, czy kernel wykonał się poprawnie
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        std::cerr << "Blad kernela: " << cudaGetErrorString(err) << "\n";
+        delete[] host_x;  // Zwolnienie pamięci na CPU
+        return 1;
     }
 
-    CUDA_CHECK(cudaFree(d_out));
-    std::free(h_out);
+    // Kopiowanie wyników z GPU z powrotem do CPU
+    cudaMemcpy(host_x, device_x, size * sizeof(int), cudaMemcpyDeviceToHost);
+
+    // Wypisanie wyników na konsolę
+    for (int i = 0; i < size; ++i)
+        std::cout << "x[" << i << "] = " << host_x[i] << "\n";
+
+    // Zwolnienie pamięci na GPU i CPU
+    cudaFree(device_x);
+    delete[] host_x;
+
     return 0;
 }
