@@ -4,7 +4,7 @@ This repo serves as the codebase for the CUDA C++ blogs series - storage and dev
 
 ## Contents
 
-- [Blogs](##blogs) — blogs materials
+- [Blogs](##blogs) - blogs materials
 - [Routines](./routines/) - handy, often used snippets of code 
 - [Templates](./templates/) - baselines for more complex implementations
 
