@@ -1,27 +1,15 @@
+#include <iostream>
 #include <vector>
+#include <cmath>
+#include <numeric>
 #include <map>
 #include <algorithm>
-#include <cmath>
-
+#include <iomanip>
 #include <cstdio>
 #include <cstdlib>
-#include <cuda_runtime.h>
+#include <iomanip> 
+#include <limits>
 
-#define CUDA_CHECK(ans) { gpuAssert((ans), __FILE__, __LINE__); }
-inline void gpuAssert(cudaError_t code, const char *file, int line) {
-    if (code != cudaSuccess) {
-        fprintf(stderr, "CUDA Error: %s %s %d\n", cudaGetErrorString(code), file, line);
-        exit(EXIT_FAILURE);
-    }
-}
-
-__global__ void kernel(int *out, int n) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < n) {
-        int val = idx + 1; // first integers above zero: 1..n
-        out[idx] = val * val;
-    }
-}
 
 struct QN_pair {
     int twoS; // 1 for S=0.5
@@ -50,45 +38,51 @@ const size_t dim_L = basis_L_qn.size();
 const size_t dim_s = basis_s_qn.size();
 const size_t dim_uncoupled = dim_L * dim_s; // 4 in our case
 
-// Factorial function helper
-double factorial(int n) {
-    double res = 1.0;
-    for (int i = 2; i <= n; ++i) res *= i;
-    return res;
+// Function log-factorial (log(n!))
+double log_factorial(double n) {
+    if (n < 0) return -std::numeric_limits<double>::infinity();
+    if (n == 0) return 0.0;
+    // We use the lgamma function, which is log(Gamma(x)) and Gamma(n+1) = n!
+    // lgamma(n+1) = log(n!)
+    return std::lgamma(n + 1);
 }
 
 // Helper function for the Wigner 3j symbol calculation
 double wigner_3j(double j1, double j2, double J, double m1, double m2, double M) {
-    // Selection rules
+    // Selection rules - te zostają bez zmian
     if (std::abs(m1) > j1 || std::abs(m2) > j2 || std::abs(M) > J) return 0.0;
-    if (std::abs(j1 - j2) > J || j1 + j2 < J) return 0.0;
-    if (std::abs(m1 + m2 + M) > 1e-9) return 0.0; // Ensure M = - (m1 + m2) for 3j
-
-    // Factorials/gamma function parts
-    double pre_factor = std::sqrt(
-        (factorial(j1 + j2 - J) * factorial(j1 - j2 + J) * factorial(-j1 + j2 + J)) /
-        factorial(j1 + j2 + J + 1)
-    ) * std::sqrt(
-        factorial(j1 + m1) * factorial(j1 - m1) * factorial(j2 + m2) * factorial(j2 - m2) *
-        factorial(J + M) * factorial(J - M)
+    if (std::abs(j1 - j2) > J + 1e-9 || j1 + j2 < J - 1e-9) return 0.0;
+    if (std::abs(m1 + m2 + M) > 1e-9) return 0.0;
+    
+    // We use log factorials to calculate the pre-factor
+    double log_pre_factor = 0.5 * (
+        log_factorial(j1 + j2 - J) + log_factorial(j1 - j2 + J) + 
+        log_factorial(-j1 + j2 + J) - log_factorial(j1 + j2 + J + 1) +
+        log_factorial(j1 + m1) + log_factorial(j1 - m1) + 
+        log_factorial(j2 + m2) + log_factorial(j2 - m2) +
+        log_factorial(J + M) + log_factorial(J - M)
     );
 
-    // Summation over k
+    // Summation - now we need to dynamically determine the range of k, 
+    // to avoid factorials of negative numbers
     double sum_val = 0.0;
-    for (int k = 0; k <= 100; ++k) { // Max 100 iterations should be enough for small J values
-        // Denominators
-        double den = factorial(k) * factorial(j1 + j2 - J - k) * factorial(j1 - m1 - k) *
-                     factorial(j2 + m2 - k) * factorial(J - j2 + k + m1) * factorial(J - j1 + k - m2);
-        
-        // Skip if denominator is zero due to factorial of negative number
-        if (std::isinf(den) || den == 0.0) continue; 
+    int k_min = std::max({0, (int)std::ceil(j2 - J - m1), (int)std::ceil(j1 - J + m2)});
+    int k_max = std::min({(int)std::floor(j1 + j2 - J), (int)std::floor(j1 - m1), (int)std::floor(j2 + m2)});
 
-        // Alternating sign
-        double term = (k % 2 == 0 ? 1.0 : -1.0) / den;
+    for (int k = k_min; k <= k_max; ++k) {
+        // Calculate the log of the denominator factorials
+        double log_den = log_factorial(k) + log_factorial(j1 + j2 - J - k) + 
+                         log_factorial(j1 - m1 - k) + log_factorial(j2 + m2 - k) + 
+                         log_factorial(J - j2 + k + m1) + log_factorial(J - j1 + k - m2);
+        
+        // Alternating sign: (-1)^k
+        double term = std::exp(-log_den);
+        if (k % 2 != 0) term = -term;
         sum_val += term;
     }
     
-    return pre_factor * sum_val;
+    // Final results: exp(log_pre_factor) * sum_val
+    return std::exp(log_pre_factor) * sum_val;
 }
 
 // Function to calculate a single Clebsch-Gordan coefficient <j1, m1; j2, m2 | J, M>
@@ -157,45 +151,40 @@ std::vector<double> build_transformation_matrix_U(
     return U;
 }
 
+void print_matrix_U(
+    const std::vector<double>& U_matrix, 
+    size_t dim_uncoupled, 
+    size_t dim_coupled
+) {
+    std::cout << "Transformation Matrix U (" << dim_uncoupled << "x" << dim_coupled << "):" << std::endl;
+    std::cout << std::fixed << std::setprecision(3); // Set precision for floating point output
+
+    // Iterate over rows (uncoupled index)
+    for (size_t i = 0; i < dim_uncoupled; ++i) {
+        // Iterate over columns (coupled index)
+        for (size_t j = 0; j < dim_coupled; ++j) {
+            // Calculate the 1D index for the 2D element U[i][j]
+            size_t index_1D = i * dim_coupled + j;
+            double value = U_matrix[index_1D];
+            
+            std::cout << std::setw(8) << value;
+        }
+        std::cout << std::endl; // Newline at the end of each row
+    }
+}
+
+
 // Example usage placeholder (requires the definition of coupled_qn_list from Step 2)
 int main() {
     // coupled_qn_list generated from Step 2
     std::vector<QN_pair> coupled_qn_list = { {0, 0}, {2, -2}, {2, 0}, {2, 2} }; // Example order
+    const size_t dim_coupled = coupled_qn_list.size();
 
     std::vector<double> U_matrix = build_transformation_matrix_U(
         basis_L_qn, basis_s_qn, coupled_qn_list
     );
 
-    std::cout << "Transformation Matrix U (dim " << dim_uncoupled << "x" << dim_coupled << "):\n";
-    // Print U (requires formatting function)
+    print_matrix_U(U_matrix, dim_uncoupled, coupled_qn_list.size());
+
     return 0;
 }
-
-// int main() {
-
-//     const int N = 100;
-
-//     // Host array allocation
-//     int *h_out = (int*)malloc(N * sizeof(int));
-//     if (!h_out) return EXIT_FAILURE;
-    
-//     // Device array allocation
-//     int *d_out = nullptr;
-//     CUDA_CHECK(cudaMalloc(&d_out, N * sizeof(int)));
-
-//     int threadsPerBlock = 128;
-//     int blocks = (N + threadsPerBlock - 1) / threadsPerBlock;
-//     kernel<<<blocks, threadsPerBlock>>>(d_out, N);
-//     CUDA_CHECK(cudaGetLastError());
-//     CUDA_CHECK(cudaDeviceSynchronize());
-
-//     CUDA_CHECK(cudaMemcpy(h_out, d_out, N * sizeof(int), cudaMemcpyDeviceToHost));
-
-//     for (int i = 0; i < N; ++i) {
-//         printf("%d^2 = %d\n", i + 1, h_out[i]);
-//     }
-
-//     CUDA_CHECK(cudaFree(d_out));
-//     std::free(h_out);
-//     return 0;
-// }
