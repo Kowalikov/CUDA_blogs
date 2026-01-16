@@ -1,3 +1,8 @@
 theme: jekyll-theme-minimal
 title: CUDA - 10 tutoriali dla początkujących
-description: Lorem ipsum
+description: Podstawy programowania równoległego z użyciem CUDA
+author: Natan Jarzyński, Mikołaj Królak, Marek Kowalik
+# first tab to click on
+blog1_title: Strona główna
+# link for the first tab (page within repository)
+blog1_url: /blog1
