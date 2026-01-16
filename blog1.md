@@ -1,7 +1,9 @@
 ---
 layout: page
-title: "{{ site.blog1_title | default: 'Blog1' }}"
+title: Strona główna
 permalink: /blog1
 ---
 
-{% include_relative blog1.html %}
+<!-- blog1 content here -->
+<h1>Blog1</h1>
+<p>Podstawy programowania równoległego z użyciem CUDA – wpis 1.</p>
