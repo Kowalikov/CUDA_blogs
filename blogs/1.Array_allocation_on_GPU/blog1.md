@@ -26,6 +26,7 @@ permalink: /blog1
   <span class="keyword" style="color:cornflowerblue">kernel CUDA</span>,
   <span class="keyword" style="color:cornflowerblue">nvcc</span>,
   <span class="keyword" style="color:cornflowerblue">nvidia-smi</span>
+<p>
 
 -----------
 <h3>CUDA w C++ - od instalacji do pierwszego programu</h3>
