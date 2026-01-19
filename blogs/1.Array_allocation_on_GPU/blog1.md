@@ -5,10 +5,27 @@ permalink: /blog1
 ---
 
 <!-- blog1 content here -->
-<h1>Alokacja tablicy na GPU </h1>
-<author>Autor: Natan Jarzyński</author>  
+<h1>Alokacja tablicy na GPU </h1>  
+
+<author> <b>Autor:</b> Natan Jarzyński</author>  
 <!-- Key words lineup -->
 <meta keywords="GPU programming, programming, coding, CUDA toolkit, CUDA, C++, GPU, programowanie równoległe, instalacja CUDA, pierwszy program CUDA, alokacja pamięci GPU, kernel CUDA, nvcc, nvidia-smi">
+<!-- display keywords interactive way -->
+<p> <b>Słowa kluczowe:</b>  
+  <span class="keyword" style="color:cornflowerblue">GPU programming</span>,
+  <span class="keyword" style="color:cornflowerblue">programming</span>,
+  <span class="keyword" style="color:cornflowerblue">coding</span>,
+  <span class="keyword" style="color:cornflowerblue">CUDA toolkit</span>,
+  <span class="keyword" style="color:cornflowerblue">CUDA</span>,
+  <span class="keyword" style="color:cornflowerblue">C++</span>,
+  <span class="keyword" style="color:cornflowerblue">GPU</span>,
+  <span class="keyword" style="color:cornflowerblue">programowanie równoległe</span>,
+  <span class="keyword" style="color:cornflowerblue">instalacja CUDA</span>,
+  <span class="keyword" style="color:cornflowerblue">pierwszy program CUDA</span>,
+  <span class="keyword" style="color:cornflowerblue">alokacja pamięci GPU</span>,
+  <span class="keyword" style="color:cornflowerblue">kernel CUDA</span>,
+  <span class="keyword" style="color:cornflowerblue">nvcc</span>,
+  <span class="keyword" style="color:cornflowerblue">nvidia-smi</span>
 
 -----------
 <h3>CUDA w C++ - od instalacji do pierwszego programu</h3>
