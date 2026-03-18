@@ -37,10 +37,10 @@ W pierwszej części tej serii pokażemy, jak przygotować środowisko programis
 <h4>🧰 Krok 1: Instalacja CUDA Toolkit</h4>
 
 1. Przejdź na stronę pobierania CUDA toolkit: https://developer.nvidia.com/cuda-toolkit
-2. Wybierz swój system operacyjny (Windows, Linux) i wersję
+2. Wybierz swój system operacyjny (Windows, Linux). Upewnij się, że masz kompatybilną kartę graficzną NVIDIA (np. z serii GeForce, Quadro, Tesla). Najprostszym sposobem w naszej opinii, jest skorzystanie z pakietu CUDA dla Windows, który zawiera wszystkie niezbędne komponenty, w tym sterowniki i narzędzia programistyczne. Na Linuxie możesz skorzystać z menedżera pakietów (np. `apt` na Ubuntu) lub pobrać instalator ze strony NVIDIA. Pamiętaj, że na Linuxie może być konieczne ręczne zainstalowanie sterowników NVIDIA przed instalacją CUDA Toolkit. Z naszego doświadczenia, na linuxie najlepiej jest użyć Ubuntu 22.04/24.04 LTS, które są szeroko wspierane przez NVIDIA i mają dobre wsparcie dla sterowników i narzędzi CUDA. Możesz na swoim Windowsie postawić Ubuntu 24.04 LTS, przez WSL (Windows Subsystem for Linux), co pozwoli Ci korzystać z narzędzi Linuxowych i jednocześnie mieć dostęp do GPU NVIDIA. Zazwyczaj GPU jest dostępna w WSL automatycznie w nowszych Windowsach. W przypadku braku automatycznej integracji, konfiguracja WSL z obsługą GPU może być nieco bardziej skomplikowana niż tradycyjna instalacja na natywnym Linuxie, ale jest to świetna opcja dla programistów, którzy chcą korzystać z obu środowisk, mimo wszystko. Tutaj [instrukcja](https://documentation.ubuntu.com/wsl/stable/howto/install-ubuntu-wsl2/) do postawienia Ubuntu 24.04 LTS przez WSL.
 3. Pobierz i zainstaluj:
+    - [Jeżeli nie są zainstalowane, jeżeli są, nie ruszaj!] Sterowniki NVIDIA (upewnij się, że są aktualne)
     - CUDA Toolkit (zawiera kompilator nvcc, biblioteki, przykłady)
-    - Sterowniki NVIDIA (upewnij się, że są aktualne)
 
 📌 Po instalacji sprawdź wersję CUDA:
 
@@ -59,8 +59,8 @@ nvidia-smi
 
 Możesz używać dowolnego edytora kodu, np.:
 
-- **Visual Studio (Windows)** — CUDA integruje się automatycznie
-- **CLion** — wygodny dla CMake, wymaga ustawienia toolchaina z `nvcc`
+- [Łatwa opcja] **Visual Studio (Windows)** — CUDA integruje się automatycznie, oprócz tego, [wspiera WSL](https://code.visualstudio.com/docs/remote/wsl), więc możesz pisać kod w Linuxie ze swojego WSL, mając graficzne IDE! 
+- [Trudniejsza opcja] **CLion** — wygodny dla CMake, wymaga ustawienia toolchaina z `nvcc`
 
 <h4>🧪 Krok 3: Test z pierwszym programem CUDA</h4>
 
@@ -135,6 +135,7 @@ int main() {
 
     return 0;
 }
+```
 
 Na linuxie możesz użyć terminala (kompilując program, dodając uprawnienia do wykonania skompilowanego pliku i uruchamiając go):
 ```bash
@@ -148,7 +149,6 @@ nvcc kernel.cu -o kernel.exe
 .\kernel.exe
 ```
 
-```
 
 <h4> 🧠 Najważniejsze elementy skryptu ⬆️ </h4>
 
