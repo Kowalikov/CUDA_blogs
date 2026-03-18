@@ -23,3 +23,15 @@ Simplest `kernel.cu` compilation:
 ```
 nvcc kernel.cu -o kernel && chmod u+x ./kernel &&./kernel
 ```
+
+## Website setup:
+
+It's on github pages with jekyll minimal setup. Here're the [docs](https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll).
+Effectively all the files with md extension can be picked up and used as subpages (blogs). The `_config.yml` file is used to set up the navigation bar and other settings. 
+
+## File structure:
+
+The `setup.md` file contains instructions on how to set up the environment for CUDA programming, which can be linked in the blogs for reference.
+The `blogs` folder contains the markdown files for each blog post, which can be edited and updated as needed. Each blog post can include code snippets, images, and links to other resources.
+The `assets` folder contains images and other static files used in the blogs.
+The `routines` and `templates` folders contain code snippets and templates for CUDA programming, which can be linked in the blogs for reference.
