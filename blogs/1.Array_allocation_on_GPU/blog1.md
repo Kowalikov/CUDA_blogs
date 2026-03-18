@@ -31,7 +31,7 @@ permalink: /blog1
 -----------
 <h3>CUDA w C++ - od instalacji do pierwszego programu</h3>
 
-W tym artykule pokażę, jak przygotować środowisko programistyczne do pracy z CUDA w C++, a następnie napiszemy i uruchomimy prosty program, który podnosi liczby do kwadratu na karcie graficznej NVIDIA. Jeśli dopiero zaczynasz przygodę z programowaniem równoległym, ten wpis jest dla Ciebie.
+W pierwszej części tej serii pokażemy, jak przygotować środowisko programistyczne do pracy z CUDA w C++, a następnie napiszemy i uruchomimy prosty program, który podnosi liczby do kwadratu na karcie graficznej NVIDIA. 
 
 
 <h4>🧰 Krok 1: Instalacja CUDA Toolkit</h4>
@@ -62,7 +62,7 @@ Możesz używać dowolnego edytora kodu, np.:
 - **Visual Studio (Windows)** — CUDA integruje się automatycznie
 - **CLion** — wygodny dla CMake, wymaga ustawienia toolchaina z `nvcc`
 
-<h4>🧪 Krok 3: Pierwszy program CUDA</h4>
+<h4>🧪 Krok 3: Test z pierwszym programem CUDA</h4>
 
 Poniżej znajduje się kod, który:
 
@@ -74,6 +74,7 @@ Poniżej znajduje się kod, który:
 
 <h4>📦 Kod źródłowy z komentarzami</h4>
 
+Jest to prosty skrypt w CUDA C++, który pokazuje, jak alokować pamięć na GPU, kopiować dane, uruchamiać kernel i synchronizować wyniki. Potraktujemy go jako "sanity check" — czyli podstawowy test, który pozwoli nam upewnić się, że środowisko CUDA jest poprawnie skonfigurowane i że możemy uruchamiać programy na GPU. W kolejnych częściach będziemy omawiać już określone funkcjonalności w szczególe. Rzuć okiem na kod i jego komentarze, a następnie wklej go do pliku `kernel.cu` i uruchom go na swoim komputerze z GPU NVIDIA, za pomocą komendy `nvcc`. 
 
 <!-- make a code snippet in cpp -->
 ```cpp
@@ -135,9 +136,21 @@ int main() {
     return 0;
 }
 
+Na linuxie możesz użyć terminala (kompilując program, dodając uprawnienia do wykonania skompilowanego pliku i uruchamiając go):
+```bash
+nvcc kernel.cu -o kernel 
+chmod u+x ./kernel
+./kernel
+```
+a na Windowsie PowerShell lub CMD:
+```powershell
+nvcc kernel.cu -o kernel.exe
+.\kernel.exe
 ```
 
-<h4> 🧠 Co warto zapamiętać? </h4>
+```
+
+<h4> 🧠 Najważniejsze elementy skryptu ⬆️ </h4>
 
 - `__global__` oznacza funkcję uruchamianą na GPU
 - `>>` to sposób uruchamiania kernela — tutaj 100 wątków
@@ -145,7 +158,14 @@ int main() {
 - `cudaDeviceSynchronize()` — czeka, aż GPU zakończy pracę
 - `cudaGetLastError()` — pozwala wykryć błędy wykonania kernela
 
+<h4> 🔍 Podsumowanie</h4>
+W tym tutorialu w 3 krokach pokazaliśmy, jak zacząć używać CUDA Toolkit i przetestować z prostym programem w CUDA C++. W kolejnych częściach zagłębimy się w szczegóły programowania równoległego z CUDA. 
+
 -------
 
 <!-- Back to main page -->
 <p><a href="https://kowalikov.github.io/CUDA_blogs/">Strona główna</a></p>
+
+
+<!-- Next blog post -->
+<p><a href="https://kowalikov.github.io/CUDA_blogs/blog2/">Blog 2: Prosty benchmark</a></p>
