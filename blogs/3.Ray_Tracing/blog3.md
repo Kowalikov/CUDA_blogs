@@ -70,7 +70,7 @@ int main() {
 <p><a href="https://kowalikov.github.io/CUDA_blogs/">Strona główna</a></p>
 
 <!-- Previous blog post -->
-<p><a href="https://kowalikov.github.io/CUDA_blogs/blog2/">Poprzedni wpis</a></p>
+<p><a href="https://kowalikov.github.io/CUDA_blogs/blog2">Poprzedni wpis</a></p>
 
 <!-- Next blog post -->
-<p><a href="https://kowalikov.github.io/CUDA_blogs/blog4/">Następny wpis</a></p>
+<p><a href="https://kowalikov.github.io/CUDA_blogs/blog4">Następny wpis</a></p>

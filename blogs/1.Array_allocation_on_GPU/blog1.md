@@ -174,4 +174,4 @@ W tym tutorialu w 3 krokach pokazaliśmy, jak zacząć używać CUDA Toolkit i p
 
 
 <!-- Next blog post -->
-<p><a href="https://kowalikov.github.io/CUDA_blogs/blog2/">Następny wpis</a></p>
+<p><a href="https://kowalikov.github.io/CUDA_blogs/blog2">Następny wpis</a></p>
