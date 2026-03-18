@@ -154,6 +154,7 @@ nvcc kernel.cu -o kernel.exe
 .\kernel.exe
 ```
 
+<span style="color: red;">**Zapisz sobie te komendy!**</span> Będziesz z nich korzystać co sekundę, gdy będziesz pisać i testować programy CUDA.
 
 <h4> 🧠 Najważniejsze elementy skryptu ⬆️ </h4>
 
@@ -173,4 +174,4 @@ W tym tutorialu w 3 krokach pokazaliśmy, jak zacząć używać CUDA Toolkit i p
 
 
 <!-- Next blog post -->
-<p><a href="https://kowalikov.github.io/CUDA_blogs/blog2/">Blog 2: Prosty benchmark</a></p>
+<p><a href="https://kowalikov.github.io/CUDA_blogs/blog2/">Następny wpis</a></p>
