@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Strona główna
+title: Prosty benchmark GPU
 permalink: /blog2
 ---
 

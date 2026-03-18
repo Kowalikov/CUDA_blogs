@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Strona główna
+title: [TBD]
 permalink: /blog3
 ---
 

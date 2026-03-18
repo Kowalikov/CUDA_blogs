@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Strona główna
+title: Ustawienie środowiska CUDA na Windowsie i Linuxie
 permalink: /blog1
 ---
 
