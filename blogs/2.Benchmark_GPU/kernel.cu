@@ -165,6 +165,7 @@ void runBenchmarkCPU(int N) {
     delete[] h_C;
 }
 
+
 void deviceSpecification(int& maxThreadsPerBlock, int& maxBlocksPerGrid) {
 
     int maxThreadsPerSM, multiProcessorCount;
@@ -194,54 +195,28 @@ bool getConfiguration(int& size, int& blocks, int& threads, int maxThreadsPerBlo
     while (true) {
 
         int menu;
-        std::cout << "\nChoose configuration mode (enter 0 as a number of threads, blocks, size or choice to exit):\n";
-        std::cout << "1 - Enter number of blocks\n";
-        std::cout << "2 - Enter number of threads\n";
-        std::cout << "Your choice: ";
-        std::cin >> menu;
-
-        if (menu == 0)
-            return false;
-
-        std::cout << "\nEnter array size [N]: ";
+        std::cout << "Enter number of threads per block (enter 0 to exit):\n";
+        std::cin >> threads;
+        if (threads == 0) return false;
+        
+        std::cout << "\nEnter array size (N for NxN), smaller than 1000:\n";
         std::cin >> size;
-        if (size == 0) 
-            return false;
-
-        if (menu == 1) {
-
-            std::cout << "Enter number of blocks: ";
-            std::cin >> blocks;
-            if (blocks == 0) 
-                return false;
-            if (blocks > maxBlocksPerGrid) {
-                std::cerr << "Error. Number of blocks exceeds GPU limit. Try again\n";
-                continue;
-            }
-            threads = (size * size + blocks - 1) / blocks;
-            if (threads > maxThreadsPerBlock) {
-                std::cerr << "Calculated number of threads (" << threads << ") exceeds GPU limit (" << maxThreadsPerBlock << ")\n";
-                continue;
-            }
+        
+        if (size <= 0) {
+            std::cerr << "Error. Array size must be a positive integer. Try again.\n";
+            continue;
+        } else if (size > 1000) {
+            std::cerr << "Warning. Array size is very large and may cause long execution times or memory issues. Try again with a smaller size.\n";
+            continue;
         }
-        else if (menu == 2) {
 
-            std::cout << "Enter number of threads per block: ";
-            std::cin >> threads;
-            if (threads == 0) return false;
-            if (threads > maxThreadsPerBlock) { 
-                std::cerr << "Error. Number of threads exceeds GPU limit. Try again\n";
-                continue;
-            }
-            blocks = (size * size + threads - 1) / threads;
-            if (blocks > maxBlocksPerGrid) {
-                std::cerr << "Calculated number of blocks (" << blocks << ") exceeds GPU limit (" << maxBlocksPerGrid << ")\n";
-                continue;
-            }
+        if (threads > maxThreadsPerBlock) { 
+            std::cerr << "Error. Number of threads exceeds GPU limit. Try again\n";
+            continue;
         }
-        else {
-
-            std::cerr << "Unknown configuration mode. Choose again\n";
+        blocks = (size * size + threads - 1) / threads;
+        if (blocks > maxBlocksPerGrid) {
+            std::cerr << "Calculated number of blocks (" << blocks << ") exceeds GPU limit (" << maxBlocksPerGrid << ")\n";
             continue;
         }
 
@@ -258,7 +233,6 @@ void clearConsole() {
     std::cout << "\033[2J\033[1;1H";
 
 }
-
 
 
 int main() {
