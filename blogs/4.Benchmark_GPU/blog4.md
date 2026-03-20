@@ -33,100 +33,6 @@ permalink: /blog2
 
 W drugiej odsłonie tej serii pokażemy, jak sprawdzić specyfikację GPU z CUDA w C++, a następnie napiszemy i uruchomimy prosty benchmark, żeby pokazać jej możliwości. 
 
-📌 Przypominajka, jak skompilować i uruchomić program CUDA na Linuxie (na Windowsie będzie podobnie, ale z rozszerzeniem `.exe`):
-```bash
-nvcc kernel.cu -o kernel && chmod u+x ./kernel && ./kernel
-```
-
-<h4>🧰 Krok 1: Sprawdzamy, czy CUDA widzi GPU</h4>
-
-
-<!-- make a code snippet in cpp -->
-```cpp
-#include <iostream>
-#include <cuda_runtime.h>
-
-    
-int main() {
-    int count = 0;
-    if (cudaGetDeviceCount(&count) == cudaSuccess && count > 0)
-        printf("CUDA device available\n");
-    else
-        printf("No CUDA device!\n");
-
-    return 0;
-}
-```
-
-<h4>🧰 Krok 2: Sprawdzamy, jakie obliczenia możemy puścić na GPU</h4>
-
-Do zaznajomienia się ze specyfikacją GPU użyjemy funkcji `cudaDeviceGetAttribute`, która pozwala nam odczytać różne parametry dotyczące możliwości naszego GPU. Zwraca ona wartość artybutu, o który pytamy w drugim argumencie funkcji, pod zmienną, której adres podajemy w pierwszym argumencie. Ostatni argument to numer urządzenia (zazwyczaj 0, jeśli mamy tylko jedno GPU). Teraz, my będziemy pytać o:
-- `cudaDevAttrMaxThreadsPerBlock` - maksymalna liczba wątków, które mogą być uruchomione w jednym bloku.
-- `cudaDevAttrMaxGridDimX` - maksymalna liczba bloków, które mogą być uruchomione w jednym wymiarze siatki (grid).
-- `cudaDevAttrMaxThreadsPerMultiProcessor` - maksymalna liczba wątków, które mogą być uruchomione na jednym multiprocesorze.
-- `cudaDevAttrMultiProcessorCount` - liczba multiprocesorów w GPU.
-
-Trochę tego dużo, ale efektywnie pozwoli nam to zrozumieć, jak duże obliczenia możemy uruchomić na naszym GPU i jak je najlepiej zorganizować.
-Rozpakujmy ten żargon. Wątki, są efektywnie tym samym co wątki na CPU, ale są organizowane w bloki, a bloki są organizowane w siatkę (grid). Multiprocesory to jednostki wykonawcze w GPU, które obsługują te bloki i wątki. Znając te parametry, możemy zoptymalizować nasze obliczenia, aby najlepiej wykorzystać zasoby GPU.
-Puśćmy teraz kod, który odczyta te parametry i wyświetli je na ekranie:
-
-<!-- make a code snippet in cpp -->
-```cpp
-#include <iostream>
-#include <cuda_runtime.h>
-
-
-void deviceSpecification(
-    int& maxThreadsPerBlock,
-    int& maxBlocksPerGrid,
-    int& maxThreadsPerSM,
-    int& multiProcessorCount
-) {
-
-    // Maximum number of threads per block
-    cudaDeviceGetAttribute(&maxThreadsPerBlock, cudaDevAttrMaxThreadsPerBlock, 0);
-
-    // Maximum number of blocks in 1D (X axis)
-    cudaDeviceGetAttribute(&maxBlocksPerGrid, cudaDevAttrMaxGridDimX, 0);
-
-    // Maximum number of threads per multiprocessor
-    cudaDeviceGetAttribute(&maxThreadsPerSM, cudaDevAttrMaxThreadsPerMultiProcessor, 0);
-
-    // Number of multiprocessors
-    cudaDeviceGetAttribute(&multiProcessorCount, cudaDevAttrMultiProcessorCount, 0);
-
-    std::cout << "*** Your GPU specifications ***\n";
-    std::cout << "Max threads per block: " << maxThreadsPerBlock << "\n";
-    std::cout << "Max blocks per grid (X): " << maxBlocksPerGrid << "\n";
-    std::cout << "Max threads per multiprocessor: " << maxThreadsPerSM << "\n";
-    std::cout << "Number of multiprocessors: " << multiProcessorCount << "\n";
-}
-
-int main() {
-
-    int maxThreads = -1, maxBlocks = -1, maxThreadsPerSM = -1, multiProcessorCount = -1;
-
-    // Show GPU specification
-    deviceSpecification(maxThreads, maxBlocks, maxThreadsPerSM, multiProcessorCount);
-    
-    return 0;
-}
-```
-
-Parę komentarzy co do tego kodu:
-- Funkcja `deviceSpecification` jest odpowiedzialna za odczytanie i wyświetlenie specyfikacji GPU. Przyjmuje ona referencje ( `int&` ) do zmiennych, które zostaną wypełnione odpowiednimi wartościami. Chcę odłożyć wyniki `cudaDeviceGetAttribute` do zmiennych w mainie, gdyby potem miałyby mi posłużyć do ustawienia rozmiaru bloków i siatki w benchmarku (albo jej limitów).
-- W `main`ie deklarujemy zmienne, które będą przechowywać te wartości, i wywołujemy funkcję `deviceSpecification`, która je wypełni i wyświetli.
-- W `cudaDeviceGetAttribute` podajemy zmienne z operatorem `&` wydobywającym adres, ponieważ ta funkcja oczekuje wskaźnika do zmiennej, w której ma zapisać wynik. Uwaga! Ten sam operator `&` jest używany zarówno do deklaracji referencji ( `int&` ), jak i do pobierania adresu zmiennej ( `&maxThreadsPerBlock` ). To może być mylące, ale w kontekście funkcji `cudaDeviceGetAttribute`, `&` jest używane do przekazania adresu zmiennej, aby funkcja mogła zapisać wynik bezpośrednio w tej zmiennej, a w przypadku deklaracji `int&` jest to sposób na stworzenie referencji, która jest aliasem dla innej zmiennej. Efektywnie, upewnieniem się, że funkcja będzie pracować z prawdziwym obiektem, a nie jego kopią.
-
-W moim przypadku, GPU pokazał następujące parametry:
-```
-*** Your GPU specifications ***
-Max threads per block: 1024
-Max blocks per grid (X): 2147483647
-Max threads per multiprocessor: 1024
-Number of multiprocessors: 14
-```
-To oznacza, że mogę uruchomić do 1024 wątków w jednym bloku, mogę mieć ogromną liczbę bloków w siatce (2^31-1), a na jednym multiprocesorze mogę mieć do 1024 wątków. Mój GPU ma 14 multiprocesorów, więc teoretycznie może obsłużyć do 14 * 1024 = 14336 wątków jednocześnie, ale to zależy od wielu czynników, takich jak zasoby pamięci i harmonogramowanie. Wykorzystajmy te informacje, aby napisać funkcję pobierającą od użytkownika rozmiar benchmarku z odpowiednimi limitami.
 
 
 <h4>🧰 Krok 3: Piszemy funkcję do pobierania konfiguracji benchmarku </h4>
@@ -202,6 +108,23 @@ void matMulCPU(float* A, float* B, float* C, int N) {
 
 <h4>🧰 Krok 5: Funkcja mnożenia macierzy na GPU </h4>
 
+
+```cpp
+// CPU – Array Multiplication
+void matMulCPU(float* A, float* B, float* C, int N) {
+    
+    for(int row = 0; row < N; row++) {
+        for (int col = 0; col < N; col++) {
+            float sum = 0.0f;
+            for (int k = 0; k < N; k++) {
+                sum += A[row * N + k] * B[k * N + col];
+            }
+            C[row * N + col] = sum;
+        }
+    }
+
+}
+```
 
 
 <h4> 🔍 Podsumowanie</h4>
