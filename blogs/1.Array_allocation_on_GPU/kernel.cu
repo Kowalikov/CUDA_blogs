@@ -2,6 +2,7 @@
 #include <cuda_runtime.h>               // Główna biblioteka CUDA do zarządzania pamięcią i urządzeniem
 #include <device_launch_parameters.h>   // Parametry uruchamiania kernela (np. blockIdx, threadIdx)
 
+
 // Kernel uruchamiany na GPU — każdy wątek podnosi jeden element tablicy do kwadratu
 __global__ void squareKernel(int* x, int n) {
     // Obliczenie globalnego indeksu wątku w siatce
