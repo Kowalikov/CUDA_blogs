@@ -1,10 +1,10 @@
 ---
 layout: default
 title: Prosty benchmark GPU
-permalink: /blog2
+permalink: /blog4
 ---
 
-<!-- blog2 content here -->
+<!-- blog4 content here -->
 <h1>Prosty benchmark GPU </h1>  
 
 <author> <b>Autor:</b> Natan Jarzyński</author>  
@@ -137,7 +137,7 @@ void matMulCPU(float* A, float* B, float* C, int N) {
 <p><a href="https://kowalikov.github.io/CUDA_blogs/">Strona główna</a></p>
 
 <!-- Previous blog post -->
-<p><a href="https://kowalikov.github.io/CUDA_blogs/blog1">Poprzedni wpis</a></p>
+<p><a href="https://kowalikov.github.io/CUDA_blogs/blog3">Poprzedni wpis</a></p>
 
 <!-- Next blog post -->
-<p><a href="https://kowalikov.github.io/CUDA_blogs/blog3">Następny wpis</a></p>
+<p><a href="https://kowalikov.github.io/CUDA_blogs/blog5">Następny wpis</a></p>
