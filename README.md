@@ -1,37 +1,42 @@
 # CUDA C++ tutorials blogs series:
 
-This repo serves as the codebase for the CUDA C++ blogs series - storage and development.
+To repo służy jako baza kodu dla serii blogów o CUDA C++. Seria blogów jest dostępna na GitHub Pages pod adresem [https://kowalikov.github.io/CUDA_blogs/](https://kowalikov.github.io/CUDA_blogs/).
 
-## Contents
+## Kontent:
 
-- [Blogs](##blogs) - blogs materials
-- [Routines](https://github.com/Kowalikov/CUDA_blogs/tree/main/routines) - handy, often used snippets of code 
-- [Templates](https://github.com/Kowalikov/CUDA_blogs/tree/main/templates) - baselines for more complex implementations
+- [Wpisy i kod źródłowy](https://github.com/Kowalikov/CUDA_blogs/tree/main/routines/blogs) - matriały do blogów, w tym kod źródłowy i markdowny
+- [Rutyny](https://github.com/Kowalikov/CUDA_blogs/tree/main/routines) - Poręczne rutynowe snippedy kodu
+- [Templatki](https://github.com/Kowalikov/CUDA_blogs/tree/main/templates) - baseline'y na złożone implementacje
 
-## Blogs:
+## Wpisy:
 
-1. Allocation the array on GPU:
-    - [source code](./blogs/1.Array_allocation_on_GPU/)
-    - [blog](/blogs/1.Array_allocation_on_GPU/blog1.md)
-    - [blog medium](https://medium.com/@njarzynski15/alokacja-tablicy-na-gpu-9299ba16fa88)
+1. [CUDA C++ Hello World: Alokacja tablicy na GPU](/blogs/1.Array_allocation_on_GPU/blog1.md)
+2. [Rozeznanie środowiska CUDA - jak poznać specyfikację GPU](/blogs/2.Sanity_check/blog2.md)
+3. [Pierwszy kernel CUDA](/blogs/3.Kernel_writing/blog3.md)
+4. [Pierwszy benchmark GPU](/blogs/4.Benchmark_GPU/blog4.md)
+5. [Prosty Ray Tracing](/blogs/5.Ray_Tracing/blog5.md)
+
+## Linki na Medium:
+
+1. [CUDA C++ Hello World: Alokacja tablicy na GPU](https://medium.com/@njarzynski15/alokacja-tablicy-na-gpu-9299ba16fa88)
 
 
-## Helpful tips:
+## Poradniki:
 
-Simplest `kernel.cu` compilation:
+Naprostsza kompilacja `kernel.cu` na linuxie:
 
 ```
 nvcc kernel.cu -o kernel && chmod u+x ./kernel &&./kernel
 ```
 
-## Website setup:
+## Setup strony z blogami:
 
-It's on github pages with jekyll minimal setup. Here're the [docs](https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll).
-Effectively all the files with md extension can be picked up and used as subpages (blogs). The `_config.yml` file is used to set up the navigation bar and other settings. 
+Znajduje się ona na GitHub Pages, z minimalną konfiguracją Jekyll - [dokumentacja](https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll) z instrukcją do konfiguracji. Efektywnie, wszystkie pliki z rozszerzeniem md mogą być użyte jako podstrony (blogi). Plik `_config.yml` służy do ustawienia paska nawigacyjnego i innych ustawień.
 
-## File structure:
+## Struktura plików:
 
-The `setup.md` file contains instructions on how to set up the environment for CUDA programming, which can be linked in the blogs for reference.
-The `blogs` folder contains the markdown files for each blog post, which can be edited and updated as needed. Each blog post can include code snippets, images, and links to other resources.
-The `assets` folder contains images and other static files used in the blogs.
-The `routines` and `templates` folders contain code snippets and templates for CUDA programming, which can be linked in the blogs for reference.
+`setup.md` zawiera instrukcje jak ustawić środowisko do programowania w CUDA.
+`blogs` folder zawiera markdowny dla każdego wpisu na blogu, które można edytować i aktualizować w razie potrzeby. Każdy wpis na blogu może zawierać fragmenty kodu i linki do innych zasobów.
+`assets` folder zawiera obrazy i inne statyczne pliki używane w blogach.
+`routines` i `templates` foldery zawierają snippety kodu i szablony do programowania w CUDA, które można linkować w blogach jako odniesienie.
+Domyślnie routines to snippety kodu, które są krótsze i bardziej ogólne, podczas gdy templates to bardziej rozbudowane implementacje, które mogą służyć jako rusztowanie i dobry punkt wyjścia do bardziej złożonych projektów.
