@@ -5,7 +5,7 @@ permalink: /blog3
 ---
 
 <!-- blog3 content here -->
-<h1>Pisanie funkcji na GPU</h1>  
+<h1>III. Pisanie funkcji na GPU</h1>  
 
 <author> <b>Autor:</b> Natan Jarzyński, Marek Kowalik </author>  
 <!-- Key words lineup -->
@@ -282,7 +282,7 @@ W tym wpisie pokazaliśmy, jak napisać prosty kernel CUDA. Stworzyliśmy, pełe
 <p><a href="https://kowalikov.github.io/CUDA_blogs/">Strona główna</a></p>
 
 <!-- Previous blog post -->
-<p><a href="https://kowalikov.github.io/CUDA_blogs/blog2">Poprzedni wpis</a></p>
+<p><a href="https://kowalikov.github.io/CUDA_blogs/blog2">Poprzedni wpis: II. Sprawdzanie środowiska CUDA</a></p>
 
 <!-- Next blog post -->
-<p><a href="https://kowalikov.github.io/CUDA_blogs/blog4">Następny wpis</a></p>
+<p><a href="https://kowalikov.github.io/CUDA_blogs/blog4">Następny wpis: IV. Prosty benchmark GPU</a></p>

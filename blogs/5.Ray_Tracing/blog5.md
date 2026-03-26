@@ -1,11 +1,11 @@
 ---
 layout: default
-title: [TBD]
+title: Prosty Ray Tracing
 permalink: /blog5
 ---
 
 <!-- blog5 content here -->
-<h1> [TBD] </h1>  
+<h1> V. Prosty Ray Tracing </h1>  
 
 <author> <b>Autor:</b> Natan Jarzyński</author>  
 <!-- Key words lineup -->
@@ -70,7 +70,7 @@ int main() {
 <p><a href="https://kowalikov.github.io/CUDA_blogs/">Strona główna</a></p>
 
 <!-- Previous blog post -->
-<p><a href="https://kowalikov.github.io/CUDA_blogs/blog4">Poprzedni wpis</a></p>
+<p><a href="https://kowalikov.github.io/CUDA_blogs/blog4">Poprzedni wpis: IV. Prosty benchmark GPU</a></p>
 
 <!-- Next blog post -->
 <p><a href="https://kowalikov.github.io/CUDA_blogs/blog5">Następny wpis</a></p>

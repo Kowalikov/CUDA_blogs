@@ -5,7 +5,7 @@ permalink: /blog2
 ---
 
 <!-- blog2 content here -->
-<h1>Sprawdzanie środowiska CUDA</h1>  
+<h1>II. Sprawdzanie środowiska CUDA</h1>  
 
 <author> <b>Autor:</b> Natan Jarzyński, Marek Kowalik </author>  
 <!-- Key words lineup -->
@@ -163,7 +163,7 @@ W tym wpisie sprawdziliśmy, czy nasze środowisko CUDA jest poprawnie skonfigur
 <p><a href="https://kowalikov.github.io/CUDA_blogs/">Strona główna</a></p>
 
 <!-- Previous blog post -->
-<p><a href="https://kowalikov.github.io/CUDA_blogs/blog1">Poprzedni wpis</a></p>
+<p><a href="https://kowalikov.github.io/CUDA_blogs/blog1">Poprzedni wpis: I. Alokacja tablicy na GPU</a></p>
 
 <!-- Next blog post -->
-<p><a href="https://kowalikov.github.io/CUDA_blogs/blog3">Następny wpis</a></p>
+<p><a href="https://kowalikov.github.io/CUDA_blogs/blog3">Następny wpis: III. Pisanie funkcji na GPU</a></p>

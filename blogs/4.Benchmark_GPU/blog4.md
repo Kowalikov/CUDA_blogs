@@ -5,7 +5,7 @@ permalink: /blog4
 ---
 
 <!-- blog4 content here -->
-<h1>Prosty benchmark GPU </h1>  
+<h1>IV. Prosty benchmark GPU </h1>  
 
 <author> <b>Autor:</b> Natan Jarzyński</author>  
 <!-- Key words lineup -->
@@ -137,7 +137,7 @@ void matMulCPU(float* A, float* B, float* C, int N) {
 <p><a href="https://kowalikov.github.io/CUDA_blogs/">Strona główna</a></p>
 
 <!-- Previous blog post -->
-<p><a href="https://kowalikov.github.io/CUDA_blogs/blog3">Poprzedni wpis</a></p>
+<p><a href="https://kowalikov.github.io/CUDA_blogs/blog3">Poprzedni wpis: III. Pisanie funkcji na GPU</a></p>
 
 <!-- Next blog post -->
-<p><a href="https://kowalikov.github.io/CUDA_blogs/blog5">Następny wpis</a></p>
+<p><a href="https://kowalikov.github.io/CUDA_blogs/blog5">Następny wpis: V. Prosty Ray Tracing</a></p>
