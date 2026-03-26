@@ -1,6 +1,6 @@
 # CUDA C++ tutorials blogs series:
 
-To repo służy jako baza kodu dla serii blogów o CUDA C++. Seria blogów jest dostępna na GitHub Pages pod adresem [https://kowalikov.github.io/CUDA_blogs/](https://kowalikov.github.io/CUDA_blogs/).
+To repo służy jako baza kodu dla serii blogów o CUDA C++. Seria blogów jest dostępna na [GitHub Pages](https://kowalikov.github.io/CUDA_blogs/).
 
 ## Zawartość:
 
@@ -31,7 +31,7 @@ nvcc kernel.cu -o kernel && chmod u+x ./kernel &&./kernel
 
 ## Setup strony z blogami:
 
-Znajduje się ona na GitHub Pages, z minimalną konfiguracją Jekyll - [dokumentacja](https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll) z instrukcją do konfiguracji. Efektywnie, wszystkie pliki z rozszerzeniem md mogą być użyte jako podstrony (blogi). Plik `_config.yml` służy do ustawienia paska nawigacyjnego i innych ustawień.
+Znajduje się ona na GitHub Pages, z minimalną konfiguracją Jekyll - [dokumentacja](https://docs.github.com/en/pages/setting-up-a-github-pages-site-with-jekyll) z instrukcją do konfiguracji. Efektywnie, wszystkie pliki z rozszerzeniem md mogą być użyte jako podstrony (blogi). Plik [`_config.yml`](./_config.yml) służy do ustawienia paska nawigacyjnego i innych ustawień.
 
 ## Struktura plików:
 
