@@ -2,9 +2,9 @@
 
 To repo służy jako baza kodu dla serii blogów o CUDA C++. Seria blogów jest dostępna na GitHub Pages pod adresem [https://kowalikov.github.io/CUDA_blogs/](https://kowalikov.github.io/CUDA_blogs/).
 
-## Kontent:
+## Zawartość:
 
-- [Wpisy i kod źródłowy](https://github.com/Kowalikov/CUDA_blogs/tree/main/routines/blogs) - matriały do blogów, w tym kod źródłowy i markdowny
+- [Wpisy i kod źródłowy](https://github.com/Kowalikov/CUDA_blogs/tree/main/blogs) - matriały do blogów, w tym kod źródłowy i markdowny
 - [Rutyny](https://github.com/Kowalikov/CUDA_blogs/tree/main/routines) - Poręczne rutynowe snippedy kodu
 - [Templatki](https://github.com/Kowalikov/CUDA_blogs/tree/main/templates) - baseline'y na złożone implementacje
 
