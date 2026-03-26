@@ -33,7 +33,7 @@ permalink: /blog2
 
 W drugiej odsłonie tej serii sprawdzimy, jak działa GPU z CUDA w C++.
 
-<h4>🧰 Kompilowanie skryptów CUDA C++ `.cu` z `nvcc`</h4>
+<h4>🧰 Kompilowanie skryptów CUDA C++ '.cu' z 'nvcc'</h4>
 
 📌 Przypominajka, jak skompilować i uruchomić program CUDA na Linuxie (na Windowsie będzie podobnie, ale z rozszerzeniem `.exe`):
 ```bash
