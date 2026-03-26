@@ -7,7 +7,7 @@ permalink: /blog2
 <!-- blog2 content here -->
 <h1>Sprawdzanie środowiska CUDA</h1>  
 
-<author> <b>Autor:</b> Natan Jarzyński</author>  
+<author> <b>Autor:</b> Natan Jarzyński, Marek Kowalik </author>  
 <!-- Key words lineup -->
 <meta keywords="GPU programming, programming, coding, CUDA toolkit, CUDA, C++, GPU, programowanie równoległe, instalacja CUDA, pierwszy program CUDA, alokacja pamięci GPU, kernel CUDA, nvcc, nvidia-smi">
 <!-- display keywords interactive way -->
