@@ -6,7 +6,11 @@ author: Natan Jarzyński, Mikołaj Królak, Marek Kowalik
 # Does not affect the theme, but can be used in your templates
 blog1_title: Ustawienie środowiska CUDA na Windowsie i Linuxie
 blog1_url: /blog1
-blog2_title: Prosty benchmark GPU
+blog2_title: Rozeznanie środowiska CUDA - jak poznać specyfikację GPU
 blog2_url: /blog2
-blog3_title: Pisanie funkcji na GPU
+blog3_title: Pierwszy kernel CUDA
 blog3_url: /blog3
+blog4_title: Pierwszy benchmark GPU
+blog4_url: /blog4
+blog5_title: Prosty Ray Tracing
+blog5_url: /blog5
