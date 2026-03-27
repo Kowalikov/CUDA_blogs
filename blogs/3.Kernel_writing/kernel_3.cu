@@ -34,7 +34,7 @@ int main() {
 
     // Alokacja pamięci na GPU (device)
     int* device_x;
-    if (!checkCuda(cudaMalloc(&device_x, size * sizeof(int)), "cudaMalloc device_x")) {
+    if (checkCuda(cudaMalloc(&device_x, size * sizeof(int)), "cudaMalloc device_x")) {
         delete[] host_x; 
         if (device_x) cudaFree(device_x);
 
