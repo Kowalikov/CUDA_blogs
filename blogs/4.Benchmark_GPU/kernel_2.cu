@@ -29,7 +29,6 @@ __global__ void matMulKernel(float* A, float* B, float* C, int N) {
     }
 }
 
-
 // CPU – Array Multiplication
 void matMulCPU(float* A, float* B, float* C, int N) {
     
@@ -168,16 +167,8 @@ void runBenchmarkCPU(int N) {
 
 void deviceSpecification(int& maxThreadsPerBlock, int& maxBlocksPerGrid) {
 
-    int maxThreadsPerSM, multiProcessorCount;
-
     // Maximum number of threads per block
     cudaDeviceGetAttribute(&maxThreadsPerBlock, cudaDevAttrMaxThreadsPerBlock, 0);
-
-    // Maximum number of threads per multiprocessor
-    cudaDeviceGetAttribute(&maxThreadsPerSM, cudaDevAttrMaxThreadsPerMultiProcessor, 0);
-
-    // Number of multiprocessors
-    cudaDeviceGetAttribute(&multiProcessorCount, cudaDevAttrMultiProcessorCount, 0);
 
     // Maximum number of blocks in 1D (X axis)
     cudaDeviceGetAttribute(&maxBlocksPerGrid, cudaDevAttrMaxGridDimX, 0);
@@ -185,16 +176,15 @@ void deviceSpecification(int& maxThreadsPerBlock, int& maxBlocksPerGrid) {
     std::cout << "*** Your GPU specifications ***\n";
     std::cout << "Max threads per block: " << maxThreadsPerBlock << "\n";
     std::cout << "Max blocks per grid (X): " << maxBlocksPerGrid << "\n";
-    std::cout << "Max threads per multiprocessor: " << maxThreadsPerSM << "\n";
-    std::cout << "Number of multiprocessors: " << multiProcessorCount << "\n";
 }
 
 
 bool getConfiguration(int& size, int& blocks, int& threads, int maxThreadsPerBlock, int maxBlocksPerGrid) {
-    
-    while (true) {
+    int loop_limit = 5;
+    int loop_count = 0;
+    while (loop_count < loop_limit) {
+        loop_count++;
 
-        int menu;
         std::cout << "Enter number of threads per block (enter 0 to exit):\n";
         std::cin >> threads;
         if (threads == 0) return false;
@@ -221,17 +211,14 @@ bool getConfiguration(int& size, int& blocks, int& threads, int maxThreadsPerBlo
         }
 
         int totalThreads = blocks * threads;
-        if (totalThreads > size * size)
+        if (totalThreads > size * size) {
             std::cout << "\nWarning: " << totalThreads - size * size << " threads will not process any data.\n\n";
-             
+        }
+        
         return true; 
     }
-}
 
-void clearConsole() {
-
-    std::cout << "\033[2J\033[1;1H";
-
+    return false;
 }
 
 
@@ -246,7 +233,9 @@ int main() {
     deviceSpecification(maxThreads, maxBlocks);
     
     // Main loop: user can run multiple benchmarks until they enter 0
-    while (true)
+    int loop_limit = 10;
+    int loop_count = 0;
+    while (loop_count < loop_limit)
     {
         if (!getConfiguration(N, blocks, threads, maxThreads, maxBlocks))
             break;
@@ -257,7 +246,8 @@ int main() {
             std::cerr << "GPU benchmark finished with an error.\n";
             return 1;
         }
-        clearConsole();
+
+        loop_count++;
     }
     return 0;
 }
