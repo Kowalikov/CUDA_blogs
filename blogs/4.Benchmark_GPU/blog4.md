@@ -378,7 +378,7 @@ bool getConfiguration(int& size, int& blocks, int& threads, int maxThreadsPerBlo
 }
 ```
 
-Nasz program jest gotowy! Pełen skrypt pobierzesz z [repo](https://github.com/kowalikov/CUDA_blogs/blob/main/4.Benchmark_GPU/kernel_2.cu).
+Nasz program jest gotowy! Pełen skrypt pobierzesz z [repo](https://github.com/kowalikov/CUDA_blogs/blob/main/blogs/4.Benchmark_GPU/kernel_2.cu).
 
 <h4> 🔍 Podsumowanie</h4>
 
