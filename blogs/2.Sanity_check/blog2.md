@@ -168,9 +168,8 @@ W tym wpisie sprawdziliśmy, czy nasze środowisko CUDA jest poprawnie skonfigur
 
  i odczytania jego specyfikacji?
 
-<details name="answers">
+<details>
 <summary>Odpowiedzi:</summary>
-<p> 
 
 1. Do sprawdzenia dostępności GPU używamy funkcji `cudaGetDeviceCount`, która odkłada liczbę dostępnych urządzeń CUDA pod przekazany wskaźnik typu int. Jeśli operacja się powiodła, funkcja zwraca `cudaSuccess`, i możemy odczytać ilość dostępnych GPU. 
 2. 
@@ -187,8 +186,6 @@ W tym wpisie sprawdziliśmy, czy nasze środowisko CUDA jest poprawnie skonfigur
     - `cudaDevAttrMaxSharedMemoryPerBlock` - maksymalna ilość pamięci współdzielonej dostępna na blok.
     - `cudaDevAttrWarpSize` - liczba wątków w warpie (zazwyczaj 32).
     - `cudaDevAttrMaxRegistersPerBlock` - maksymalna liczba rejestrów dostępna na blok.
-
-</p>
 
 </details>
 
