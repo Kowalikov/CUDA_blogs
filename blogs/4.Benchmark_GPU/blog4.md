@@ -384,7 +384,24 @@ Nasz program jest gotowy! Pełen skrypt pobierzesz z [repo](https://github.com/k
 
 W tym wpisie stworzyliśmy prosty program do benchmarku GPU, który mnoży dwie macierze na CPU i GPU, mierząc czas wykonania obu operacji. Program jest interaktywny, pozwalając użytkownikowi wprowadzić rozmiar macierzy i konfigurację kernela, z odpowiednią walidacją danych. Dzięki temu możemy zobaczyć różnicę w czasie wykonania między CPU a GPU dla różnych rozmiarów macierzy i konfiguracji. To świetny sposób, żeby zobaczyć moc obliczeniową GPU w praktyce!
 
--------
+------------------------------
+<h2> Pytania kontrolne </h2>
+
+1. ...
+
+------------------------------
+<h2>Ćwiczenia:</h2>
+
+1. ...
+
+------------------------------
+<break></break>
+------------------------------
+<h2>Odpowiedzi do pytań kontrolnych:</h2>
+
+1. ...
+
+------------------------------
 
 <!-- Back to main page -->
 <p><a href="https://kowalikov.github.io/CUDA_blogs/">Strona główna</a></p>

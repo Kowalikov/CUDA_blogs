@@ -322,8 +322,19 @@ W tym wpisie pokazaliśmy, jak napisać prosty kernel CUDA. Stworzyliśmy, pełe
     (b) Jak wypisać jego komunikat?  
     (c) Co się stanie, jeżeli sprawdzimy ostatni błąd CUDA po udanym wywołaniu kernela?
 
-<details>
-<summary>Odpowiedzi
+------------------------------
+<h2>Ćwiczenia:</h2>
+
+1. Zmodyfikuj kernel i jego wywołanie, żeby przyjmował w dalszym ciągu tablicę jednowymiarową, ale tym razem o rozmiarze 512, i wywołaj jeden blok i 512 wątków zorganizowanych jako {8, 8, 8}. Nie zapomnij o zaktualizowaniu indeksowania w kernelu, aby poprawnie obliczyć globalny indeks wątku w siatce.
+
+2. Napisz nowy kernel, który najpierw podniesie każdy element tablicy do kwadratu, odłoży dane z GPU do pamięci hosta, a następnie doda 10 do każdego elementu i odłoży nowe wyniki do innej tablicy na hoście. Nie zapomnij o synchronizacji i sprawdzaniu błędów.
+
+3. Napisz program, który doda dwie małe tablice. Zdefiniuj kernel, który przyjmuje dwie tablice wejściowe i jedną tablicę wyjściową, i dodaje elementy z dwóch tablic wejściowych, zapisując wynik w tablicy wyjściowej. Uruchom kernel z odpowiednią konfiguracją bloków i wątków, a następnie skopiuj wyniki z GPU z powrotem na CPU i wypisz je.
+
+------------------------------
+<break></break>
+------------------------------
+<h2>Odpowiedzi do pytań kontrolnych:</h2>
 
 1. Modyfikator `__global__` służy do zdefiniowania funkcji kernela w CUDA. Oznacza on, że funkcja jest uruchamiana na GPU i może być wywoływana z CPU. Składniowo, kernel jest definiowany jako `__global__ <typ_zwracany> nazwa_kernela(...) { ... }`.
 2. (a) Indeksy bloku można wywołać za pomocą wbudowanych zmiennych `blockIdx.x`, `blockIdx.y`, i `blockIdx.z` dla odpowiednio wymiarów x, y, i z.  
@@ -334,16 +345,6 @@ W tym wpisie pokazaliśmy, jak napisać prosty kernel CUDA. Stworzyliśmy, pełe
 4. (a) Aby sprawdzić ostatni błąd CUDA, używamy funkcji `cudaGetLastError()`, która zwraca kod błędu typu `cudaError_t`.  
    (b) Aby wypisać komunikat błędu, możemy użyć funkcji `cudaGetErrorString(cudaError_t error)`, która zwraca czytelny komunikat opisujący błąd.  
    (c) Jeżeli sprawdzimy ostatni błąd CUDA po udanym wywołaniu kernela, `cudaGetLastError()` zwróci `cudaSuccess`, co oznacza, że nie wystąpił żaden błąd. W takim przypadku, `cudaGetErrorString(cudaSuccess)` zwróci komunikat "no error", co potwierdzi, że kernel wykonał się poprawnie.
-
-
-------------------------------
-<h2>Ćwiczenia:</h2>
-
-1. Zmodyfikuj kernel i jego wywołanie, żeby przyjmował w dalszym ciągu tablicę jednowymiarową, ale tym razem o rozmiarze 512, i wywołaj jeden blok i 512 wątków zorganizowanych jako {8, 8, 8}. Nie zapomnij o zaktualizowaniu indeksowania w kernelu, aby poprawnie obliczyć globalny indeks wątku w siatce.
-
-2. Napisz nowy kernel, który najpierw podniesie każdy element tablicy do kwadratu, odłoży dane z GPU do pamięci hosta, a następnie doda 10 do każdego elementu i odłoży nowe wyniki do innej tablicy na hoście. Nie zapomnij o synchronizacji i sprawdzaniu błędów.
-
-3. Napisz program, który doda dwie małe tablice. Zdefiniuj kernel, który przyjmuje dwie tablice wejściowe i jedną tablicę wyjściową, i dodaje elementy z dwóch tablic wejściowych, zapisując wynik w tablicy wyjściowej. Uruchom kernel z odpowiednią konfiguracją bloków i wątków, a następnie skopiuj wyniki z GPU z powrotem na CPU i wypisz je.
 
 ------------------------------
 

@@ -1,7 +1,11 @@
 /.vscode
 
 _archive
+_site
 
 bin
 
 kernel
+
+Gemfile
+Gemfile.lock
