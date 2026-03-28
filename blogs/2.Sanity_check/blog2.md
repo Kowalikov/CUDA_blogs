@@ -169,7 +169,9 @@ W tym wpisie sprawdziliśmy, czy nasze środowisko CUDA jest poprawnie skonfigur
  i odczytania jego specyfikacji?
 
 <details name="answers">
-  <summary>Odpowiedzi</summary>
+<summary>Odpowiedzi</summary>  
+
+<break></break>
   
 1. Do sprawdzenia dostępności GPU używamy funkcji `cudaGetDeviceCount`, która odkłada liczbę dostępnych urządzeń CUDA pod przekazany wskaźnik typu int. Jeśli operacja się powiodła, funkcja zwraca `cudaSuccess`, i możemy odczytać ilość dostępnych GPU. 
 2. 
@@ -197,7 +199,7 @@ W tym wpisie sprawdziliśmy, czy nasze środowisko CUDA jest poprawnie skonfigur
 2. Policz ile wątków możesz uruchomić jednocześnie na swoim GPU, biorąc pod uwagę liczbę multiprocesorów i maksymalną liczbę wątków na multiprocesor. Jak to się ma do maksymalnej liczby wątków na blok?
 3. Zmodyfikuj kod, aby odczytać i wyświetlić dwa inne atrybuty GPU, które wydają Ci się interesujące, takie jak ilość  ilość pamięci współdzielonej na blok, czy rozmiar warpa. 
 
--------
+------------------------------
 
 <!-- Back to main page -->
 <p><a href="https://kowalikov.github.io/CUDA_blogs/">Strona główna</a></p>

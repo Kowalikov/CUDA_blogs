@@ -43,6 +43,23 @@ W tym celu potrzebujemy dwóch importów:
 - `#include <cuda_runtime.h>` - główna biblioteka CUDA do zarządzania pamięcią i urządzeniem. Bez niej nie napiszemy kernela ani nie będziemy mogli alokować pamięci na GPU.
 - `#include <device_launch_parameters.h>` - zawiera definicje parametrów uruchamiania kernela, takich jak `blockIdx`, `threadIdx`, `blockDim`, które pozwalają nam zorientować się, który wątek i blok wykonuje dany fragment kodu.
 
+Nasz przykładowy kernel bedzie prosty - wyłuskamy z niego informacje, jak jest wykonywany. Zacznijmy od krótkiego wyjaśnienia jak działają kernele, po co się je wywołuje i jak są organizowane.
+
+Najważniejszym celem angażowania GPU w obliczenia jest masowe zrównoleglenie pracy. GPU składa się z tysięcy rdzeni, które mogą wykonywać obliczenia równolegle. Aby to wykorzystać, musimy napisać kod, który będzie wykonywany przez wiele wątków jednocześnie. Kernel jest właśnie takim kodem - jest to funkcja, która jest uruchamiana na GPU i może być wykonywana przez wiele wątków równocześnie.
+
+Możesz je traktować jako wnętrze funkcji `for`. W prostym scenariuszu, weźmy pętlę z 20 iteracjami, które za każdym razem podnoszą iterator do kwadratu. Możemy napisać to jako kernel, który jest uruchamiany przez 20 wątków, a każdy wątek będzie odpowiedzialny za jedną iterację tej pętli. Tylko, chwila, skąd dane wywołanie ma wiedzieć, która iteracja jest jego zadaniem? Zacznijmy od organizacji wątków, bloków i siatek, a potem wrócimy do tego pytania.
+
+
+Rozmawialiśmy o wątkach, a tutaj nagle dochodzą bloki i siatki. Wyjaśnijmy to. Wątki są organizowane w bloki, a bloki są organizowane w siatki. Blok to grupa wątków, które mogą współdzielić pamięć i synchronizować się ze sobą. Siatka to grupa bloków, które mogą być uruchamiane na GPU. Kiedy uruchamiamy kernel, musimy określić, ile bloków i ile wątków na blok chcemy uruchomić - to tworzy naszą siatkę. Na przykład, jeśli chcemy uruchomić 2 bloki po 4 wątki każdy, napiszemy `kernel <<< 2, 4 >>> ();`. Oznacza to, że uruchomimy 2 bloki, a każdy blok będzie miał 4 wątki, co daje nam łącznie 8-wątkową siatkę wykonującą nasz kernel. W prostej analogii, siatka to wybudowany budynek fabryki, składający się z bloków (pięter i ich sekcji), a wątki, to pracownicy wykonujący zadania w tych blokach. Każdy pracownik (wątek) wie, w którym bloku (piętrze) pracuje i jakie zadanie ma wykonać, dzięki wbudowanym zmiennym, które mówią mu, gdzie się znajduje w strukturze siatki. Jeżeli mamy 5 bloków po 10 wątków, to mamy 50 pracowników, którzy mogą wykonywać zadania równolegle, a każdy z nich wie, które zadanie ma wykonać dzięki swojej pozycji w strukturze siatki.
+
+Teraz, wątki i bloki, możemy organizować w trzech wymiarach (x, y, z), co pozwala nam tworzyć bardziej złożone struktury siatki. Na przykład, możemy mieć 2 bloki w wymiarze x i 3 bloki w wymiarze y, co daje nam 6 bloków w sumie. Każdy blok może mieć 4 wątki w wymiarze x i 5 wątki w wymiarze y, co daje nam 20 wątków na blok. W ten sposób, możemy tworzyć siatki o różnych kształtach i rozmiarach, które są dostosowane do naszych potrzeb obliczeniowych. Nie oznacza to `fizycznej` organizacji wątków na GPU, a jedynie ułatwienie pracy na wielowymiarowych danych, takich jak obrazy czy macierze, gdzie naturalnie pasuje nam organizacja w trzech wymiarach.  
+
+W naszej analogii, możemy pomyśleć o danym bloku z indeksami x, y, z jako bloku w budynku x, piętrze y, sekcji z, a wątki w tym bloku jako pracownicy wykonujący zadania w tej konkretnej lokalizacji. Dalej, pracownicy mogą być pogrupowani w trzy wymiary, i tak, każdy z nich pracuje w jednosce x, dziale y (jednostki x), z numerem pracownika z. 
+
+Wróćmy do pytania, skąd w kernelu wziąć te indeksy? Odpowiedź jest prosta - każdy wątek ma wbudowane zmienne, które mówią mu, jakim jest wykonaniem. Te zmienne to `blockIdx` i `threadIdx`. Można z nich wyłuskać indeksy x, y i z. Na przykład, `blockIdx.x` daje nam indeks bloku w wymiarze x, `threadIdx.x` daje nam indeks wątku w wymiarze x.
+Oprócz indeksów, wymiary bloków i siatki mogą być pomocne i są one dostępne przez `blockDim` i `gridDim`. 
+
+Dzięki tym zmiennym, każdy wątek może obliczyć swoją unikalną pozycję w siatce i wiedzieć, które zadanie ma wykonać, oraz w jakich ramach i limitach pracuje.
 
 <!-- make a code snippet in cpp -->
 ```cpp
@@ -53,12 +70,21 @@ W tym celu potrzebujemy dwóch importów:
 
 // Kernel uruchamiany na GPU - każdy wątek odkłada lokalnie indeksy bloku i wątku jaki go wykonuje
 __global__ void kernel() {
-    int thr_idx_x = blockIdx.x;
-    int thr_idx_y = blockIdx.y;
-    int thr_idx_z = blockIdx.z;
+    int thr_idx_x = threadIdx.x;
+    int thr_idx_y = threadIdx.y;
+    int thr_idx_z = threadIdx.z;
 
-    int block_idx_x = blockDim.x;
-    int block_idx_y = blockDim.y; 
+    int block_idx_x = blockIdx.x;
+    int block_idx_y = blockIdx.y;
+    int block_idx_z = blockIdx.z;
+
+    int block_dim_x = blockDim.x;
+    int block_dim_y = blockDim.y;
+    int block_dim_z = blockDim.z;
+
+    int grid_dim_x = gridDim.x;
+    int grid_dim_y = gridDim.y;
+    int grid_dim_z = gridDim.z;
 }
 ```
 
@@ -84,6 +110,8 @@ int main() {
 ```
 
 Dość egzotyczna składnia, prawda? Nazwa oddzielona od nawiasów do wywołania, a w nich liczby określające rozmiar siatki i bloku. Ale dzięki temu składnia CUDA C++ jest tak wyraźna i charakterystyczna.  
+
+Co z przypadkiem gdy potrzebujemy siatkę wątków albo bloków? Możemy użyć dim3 do określenia wymiarów siatki i bloków. Na przykład, `dim3 blockSize(4, 4, 1);` tworzy blok o wymiarach 4x4x1, a `dim3 gridSize(2, 2, 1);` tworzy siatkę o wymiarach 2x2x1. Następnie możemy uruchomić kernel używając tych zmiennych: `kernel <<< gridSize, blockSize >>> ();`.
 
 Oprócz wywołania, mamy też synchronizację, która jest ważna, ponieważ kernel jest wykonywany asynchronicznie. Musimy poczekać, aż GPU zakończy pracę, zanim przejdziemy dalej w kodzie. Będzie to ważne, gdy będziemy chcieli odczytać wyniki z GPU i przenieść je na CPU, po zakończeniu pracy wszystkich wątków.  
 
@@ -272,11 +300,55 @@ Pamiętaj, że pełne skrypty CUDA powinny zawsze zawierać obsługę błędów,
 
 Co do kodu, masz pełne skrypty na źródłowym GitHbubie, więc możesz je skopiować bezpośrednio stamtąd, bez update'owania wyrywków z bloga.
 
+------------------------------
+
 <h4> 🔍 Podsumowanie</h4>
 
 W tym wpisie pokazaliśmy, jak napisać prosty kernel CUDA. Stworzyliśmy, pełen skrypt, używający danych z hosta i przeprowadzący obliczenia na GPU. Omówiliśmy, jak alokować pamięć na GPU, kopiować dane między CPU a GPU, uruchamiać kernel i sprawdzać jego poprawność. Pokazaliśmy też, jak obsługiwać błędy CUDA, aby nasz program był bardziej stabilny i łatwiejszy do debugowania, i obudowaliśmy nasz skrypt pod obsługę wszystkich błedów i bezpieczne wykonanie od początku do końca. 
 
--------
+
+------------------------------
+<h2> Pytania kontrolne </h2>
+
+1. Jaki modyfikator `__<...>___` służy do zdefiniowania funkcji kernela w CUDA?
+2. Będąc w kernelu, możemy zidentyfikować kilka wbudowanych zmiennych, które dostarczają informacji o pozycji wątku w siatce i bloku.  
+    (a) Jak wywołać indeksy bloku?  
+    (b) Jakie identykiatory wywołania kernela znasz, które możesz odczytać?
+
+3. Dlaczego musimy używać `cudaDeviceSynchronize()` po uruchomieniu kernela, zanim przejdziemy dalej w kodzie?
+
+4. Sprawdzanie błędów:  
+    (a) Jak sprawdzić ostatni błąd CUDA?  
+    (b) Jak wypisać jego komunikat?  
+    (c) Co się stanie, jeżeli sprawdzimy ostatni błąd CUDA po udanym wywołaniu kernela?
+
+<details name="answers">
+<summary>Odpowiedzi</summary>  
+
+<break></break>
+  
+1. Modyfikator `__global__` służy do zdefiniowania funkcji kernela w CUDA. Oznacza on, że funkcja jest uruchamiana na GPU i może być wywoływana z CPU. Składniowo, kernel jest definiowany jako `__global__ <typ_zwracany> nazwa_kernela(...) { ... }`.
+2. (a) Indeksy bloku można wywołać za pomocą wbudowanych zmiennych `blockIdx.x`, `blockIdx.y`, i `blockIdx.z` dla odpowiednio wymiarów x, y, i z.  
+   (b) Oprócz `blockIdx`, mamy też `threadIdx` do identyfikacji indeksów wątku w bloku, `blockDim` do określenia rozmiaru bloku, oraz `gridDim` do określenia rozmiaru siatki.
+
+3. Musimy używać `cudaDeviceSynchronize()` po uruchomieniu kernela, ponieważ kernel jest wykonywany asynchronicznie. Oznacza to, że CPU może kontynuować wykonywanie kodu, zanim GPU zakończy pracę nad kernelem. Jeśli chcemy mieć pewność, że kernel zakończył się przed przejściem dalej w kodzie (na przykład, jeśli chcemy odczytać wyniki z GPU), musimy zsynchronizować CPU z GPU, używając `cudaDeviceSynchronize()`. Bez tej synchronizacji, moglibyśmy próbować odczytać dane z GPU zanim kernel zakończy swoje działanie, co prowadziłoby do błędów i nieprzewidywalnych wyników.
+
+4. (a) Aby sprawdzić ostatni błąd CUDA, używamy funkcji `cudaGetLastError()`, która zwraca kod błędu typu `cudaError_t`.  
+   (b) Aby wypisać komunikat błędu, możemy użyć funkcji `cudaGetErrorString(cudaError_t error)`, która zwraca czytelny komunikat opisujący błąd.  
+   (c) Jeżeli sprawdzimy ostatni błąd CUDA po udanym wywołaniu kernela, `cudaGetLastError()` zwróci `cudaSuccess`, co oznacza, że nie wystąpił żaden błąd. W takim przypadku, `cudaGetErrorString(cudaSuccess)` zwróci komunikat "no error", co potwierdzi, że kernel wykonał się poprawnie.
+
+</details>
+
+------------------------------
+<h2>Ćwiczenia:</h2>
+
+1. Zmodyfikuj kernel i jego wywołanie, żeby przyjmował w dalszym ciągu tablicę jednowymiarową, ale tym razem o rozmiarze 512, i wywołaj jeden blok i 512 wątków zorganizowanych jako {8, 8, 8}. Nie zapomnij o zaktualizowaniu indeksowania w kernelu, aby poprawnie obliczyć globalny indeks wątku w siatce.
+
+2. Napisz nowy kernel, który najpierw podniesie każdy element tablicy do kwadratu, odłoży dane z GPU do pamięci hosta, a następnie doda 10 do każdego elementu i odłoży nowe wyniki do innej tablicy na hoście. Nie zapomnij o synchronizacji i sprawdzaniu błędów.
+
+3. Napisz program, który doda dwie małe tablice. Zdefiniuj kernel, który przyjmuje dwie tablice wejściowe i jedną tablicę wyjściową, i dodaje elementy z dwóch tablic wejściowych, zapisując wynik w tablicy wyjściowej. Uruchom kernel z odpowiednią konfiguracją bloków i wątków, a następnie skopiuj wyniki z GPU z powrotem na CPU i wypisz je.
+
+------------------------------
 
 <!-- Back to main page -->
 <p><a href="https://kowalikov.github.io/CUDA_blogs/">Strona główna</a></p>
