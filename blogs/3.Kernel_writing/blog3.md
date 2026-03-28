@@ -322,11 +322,9 @@ W tym wpisie pokazaliśmy, jak napisać prosty kernel CUDA. Stworzyliśmy, pełe
     (b) Jak wypisać jego komunikat?  
     (c) Co się stanie, jeżeli sprawdzimy ostatni błąd CUDA po udanym wywołaniu kernela?
 
-<details name="answers">
-<summary>Odpowiedzi</summary>  
+<details>
+<summary>Odpowiedzi
 
-<break></break>
-  
 1. Modyfikator `__global__` służy do zdefiniowania funkcji kernela w CUDA. Oznacza on, że funkcja jest uruchamiana na GPU i może być wywoływana z CPU. Składniowo, kernel jest definiowany jako `__global__ <typ_zwracany> nazwa_kernela(...) { ... }`.
 2. (a) Indeksy bloku można wywołać za pomocą wbudowanych zmiennych `blockIdx.x`, `blockIdx.y`, i `blockIdx.z` dla odpowiednio wymiarów x, y, i z.  
    (b) Oprócz `blockIdx`, mamy też `threadIdx` do identyfikacji indeksów wątku w bloku, `blockDim` do określenia rozmiaru bloku, oraz `gridDim` do określenia rozmiaru siatki.
@@ -337,7 +335,6 @@ W tym wpisie pokazaliśmy, jak napisać prosty kernel CUDA. Stworzyliśmy, pełe
    (b) Aby wypisać komunikat błędu, możemy użyć funkcji `cudaGetErrorString(cudaError_t error)`, która zwraca czytelny komunikat opisujący błąd.  
    (c) Jeżeli sprawdzimy ostatni błąd CUDA po udanym wywołaniu kernela, `cudaGetLastError()` zwróci `cudaSuccess`, co oznacza, że nie wystąpił żaden błąd. W takim przypadku, `cudaGetErrorString(cudaSuccess)` zwróci komunikat "no error", co potwierdzi, że kernel wykonał się poprawnie.
 
-</details>
 
 ------------------------------
 <h2>Ćwiczenia:</h2>

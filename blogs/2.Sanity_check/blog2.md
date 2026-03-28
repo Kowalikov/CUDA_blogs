@@ -166,10 +166,8 @@ W tym wpisie sprawdziliśmy, czy nasze środowisko CUDA jest poprawnie skonfigur
     (a) Jakie argumenty przyjmuje?  
     (b) Jakie atrybuty znasz, które możesz odczytać?
 
- i odczytania jego specyfikacji?
-
 <details>
-<summary>Odpowiedzi:</summary>
+<summary>Odpowiedzi:
 
 1. Do sprawdzenia dostępności GPU używamy funkcji `cudaGetDeviceCount`, która odkłada liczbę dostępnych urządzeń CUDA pod przekazany wskaźnik typu int. Jeśli operacja się powiodła, funkcja zwraca `cudaSuccess`, i możemy odczytać ilość dostępnych GPU. 
 2. 
@@ -187,7 +185,6 @@ W tym wpisie sprawdziliśmy, czy nasze środowisko CUDA jest poprawnie skonfigur
     - `cudaDevAttrWarpSize` - liczba wątków w warpie (zazwyczaj 32).
     - `cudaDevAttrMaxRegistersPerBlock` - maksymalna liczba rejestrów dostępna na blok.
 
-</details>
 
 ------------------------------
 
