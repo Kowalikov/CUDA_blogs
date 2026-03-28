@@ -169,18 +169,17 @@ W tym wpisie sprawdziliśmy, czy nasze środowisko CUDA jest poprawnie skonfigur
  i odczytania jego specyfikacji?
 
 <details name="answers">
-<summary>Odpowiedzi</summary>  
+<summary>Odpowiedzi:</summary>
+<p> 
 
-<break></break>
-  
 1. Do sprawdzenia dostępności GPU używamy funkcji `cudaGetDeviceCount`, która odkłada liczbę dostępnych urządzeń CUDA pod przekazany wskaźnik typu int. Jeśli operacja się powiodła, funkcja zwraca `cudaSuccess`, i możemy odczytać ilość dostępnych GPU. 
 2. 
-    a) Funkcja `cudaDeviceGetAttribute`, za [dokumnetacją](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html#group__CUDART__DEVICE_1gb22e8256592b836df9a9cc36c9db7151) przyjmuje:
+    (a) Funkcja `cudaDeviceGetAttribute`, za [dokumentacją](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html#group__CUDART__DEVICE_1gb22e8256592b836df9a9cc36c9db7151) przyjmuje:
     - wskaźnik do zmiennej typu `int`, gdzie odłożymy wynik
     - atrybut który chcemy odczytać (typ `cudaDeviceAttr`)
     - numer urządzenia (zazwyczaj 0, jeśli mamy tylko jedno GPU)
     
-    b) Przykładowe atrybuty, które możemy odczytać to:
+    (b) Przykładowe atrybuty, które możemy odczytać to:
     - `cudaDevAttrMaxThreadsPerBlock` - maksymalna liczba wątków, które mogą być uruchomione w jednym bloku.
     - `cudaDevAttrMaxGridDimX` - maksymalna liczba bloków, które mogą być uruchomione w jednym wymiarze siatki (grid).
     - `cudaDevAttrMaxThreadsPerMultiProcessor` - maksymalna liczba wątków, które mogą być uruchomione na jednym multiprocesorze.
@@ -188,6 +187,8 @@ W tym wpisie sprawdziliśmy, czy nasze środowisko CUDA jest poprawnie skonfigur
     - `cudaDevAttrMaxSharedMemoryPerBlock` - maksymalna ilość pamięci współdzielonej dostępna na blok.
     - `cudaDevAttrWarpSize` - liczba wątków w warpie (zazwyczaj 32).
     - `cudaDevAttrMaxRegistersPerBlock` - maksymalna liczba rejestrów dostępna na blok.
+
+</p>
 
 </details>
 
