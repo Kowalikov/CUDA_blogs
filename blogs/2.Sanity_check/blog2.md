@@ -152,10 +152,50 @@ To oznacza, że mogę uruchomić do 1024 wątków w jednym bloku, mogę mieć og
 
 Po więcej informacji o hierarchii wykonania CUDA i jej implikacjach dla projektowania kerneli, polecam zajrzeć do dokumentacji NVIDII oraz przewodnika [CUDA C++ Programming Guide](https://docs.nvidia.com/cuda/cuda-c-programming-guide/), gdzie jest to omówione bardzo szczegółowo.
 
+------------------------------
 
 <h4> 🔍 Podsumowanie</h4>
 
 W tym wpisie sprawdziliśmy, czy nasze środowisko CUDA jest poprawnie skonfigurowane i czy możemy wykryć nasz GPU. Następnie odczytaliśmy specyfikację naszego GPU, co pozwoli nam lepiej zrozumieć, jakie obliczenia możemy na nim uruchomić i jak je zoptymalizować. W kolejnych częściach tej serii będziemy już pisać konkretne programy CUDA, które będą wykorzystywać te możliwości do wykonywania różnych zadań obliczeniowych.
+
+------------------------------
+<h2> Pytania kontrolne </h2>
+
+1. Jakie funkcje CUDA używamy do sprawdzenia dostępności GPU?
+2. Funkcja `cudaDeviceGetAttribute` pozwala nam odczytać różne parametry dotyczące możliwości naszego GPU.  
+    (a) Jakie argumenty przyjmuje?  
+    (b) Jakie atrybuty znasz, które możesz odczytać?
+
+ i odczytania jego specyfikacji?
+
+<details name="answers">
+  <summary>Odpowiedzi</summary>
+  
+1. Do sprawdzenia dostępności GPU używamy funkcji `cudaGetDeviceCount`, która odkłada liczbę dostępnych urządzeń CUDA pod przekazany wskaźnik typu int. Jeśli operacja się powiodła, funkcja zwraca `cudaSuccess`, i możemy odczytać ilość dostępnych GPU. 
+2. 
+    a) Funkcja `cudaDeviceGetAttribute`, za [dokumnetacją](https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__DEVICE.html#group__CUDART__DEVICE_1gb22e8256592b836df9a9cc36c9db7151) przyjmuje:
+    - wskaźnik do zmiennej typu `int`, gdzie odłożymy wynik
+    - atrybut który chcemy odczytać (typ `cudaDeviceAttr`)
+    - numer urządzenia (zazwyczaj 0, jeśli mamy tylko jedno GPU)
+    
+    b) Przykładowe atrybuty, które możemy odczytać to:
+    - `cudaDevAttrMaxThreadsPerBlock` - maksymalna liczba wątków, które mogą być uruchomione w jednym bloku.
+    - `cudaDevAttrMaxGridDimX` - maksymalna liczba bloków, które mogą być uruchomione w jednym wymiarze siatki (grid).
+    - `cudaDevAttrMaxThreadsPerMultiProcessor` - maksymalna liczba wątków, które mogą być uruchomione na jednym multiprocesorze.
+    - `cudaDevAttrMultiProcessorCount` - liczba multiprocesorów w GPU.
+    - `cudaDevAttrMaxSharedMemoryPerBlock` - maksymalna ilość pamięci współdzielonej dostępna na blok.
+    - `cudaDevAttrWarpSize` - liczba wątków w warpie (zazwyczaj 32).
+    - `cudaDevAttrMaxRegistersPerBlock` - maksymalna liczba rejestrów dostępna na blok.
+
+</details>
+
+------------------------------
+
+<h2>Ćwiczenia:</h2>
+
+1. Sprawdź specyfikację swojego GPU i zapisz kilka kluczowych atrybutów. Puść kod z tego wpisu i porównaj wyniki z dokumentacją swojego GPU, aby lepiej zrozumieć jego możliwości.
+2. Policz ile wątków możesz uruchomić jednocześnie na swoim GPU, biorąc pod uwagę liczbę multiprocesorów i maksymalną liczbę wątków na multiprocesor. Jak to się ma do maksymalnej liczby wątków na blok?
+3. Zmodyfikuj kod, aby odczytać i wyświetlić dwa inne atrybuty GPU, które wydają Ci się interesujące, takie jak ilość  ilość pamięci współdzielonej na blok, czy rozmiar warpa. 
 
 -------
 
