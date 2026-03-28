@@ -10,7 +10,7 @@ To repo służy jako baza kodu dla serii blogów o CUDA C++. Seria blogów jest 
 
 ## Wpisy:
 
-1. [CUDA C++ Hello World: Alokacja tablicy na GPU](/blogs/1.Array_allocation_on_GPU/blog1.md)
+1. [Ustawienie środowiska CUDA na Windowsie i Linuxie](/blogs/1.CUDA_setup/blog1.md)
 2. [Rozeznanie środowiska CUDA - jak poznać specyfikację GPU](/blogs/2.Sanity_check/blog2.md)
 3. [Pierwszy kernel CUDA](/blogs/3.Kernel_writing/blog3.md)
 4. [Pierwszy benchmark GPU](/blogs/4.Benchmark_GPU/blog4.md)

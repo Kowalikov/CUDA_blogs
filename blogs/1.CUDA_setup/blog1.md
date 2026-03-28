@@ -5,7 +5,7 @@ permalink: /blog1
 ---
 
 <!-- blog1 content here -->
-<h1>I. Alokacja tablicy na GPU </h1>  
+<h1>I. CUDA C++: Ustawienie środowiska CUDA na Windowsie i Linuxie </h1>  
 
 <author> <b>Autor:</b> Natan Jarzyński</author>  
 <!-- Key words lineup -->
@@ -36,15 +36,20 @@ W pierwszej części tej serii pokażemy, jak przygotować środowisko programis
 
 <h4>🧰 Krok 1: Instalacja CUDA Toolkit</h4>
 
+>Upewnij się, że masz kompatybilną kartę graficzną NVIDIA (np. z serii GeForce, Quadro, Tesla).
+
 1. Przejdź na stronę pobierania CUDA toolkit: https://developer.nvidia.com/cuda-toolkit
-2. Wybierz swój system operacyjny (Windows, Linux). 
->Upewnij się, że masz kompatybilną kartę graficzną NVIDIA (np. z serii GeForce, Quadro, Tesla). 
->Najprostszym sposobem w naszej opinii, jest skorzystanie z pakietu CUDA dla Windows, który zawiera wszystkie niezbędne komponenty, w tym sterowniki i narzędzia programistyczne. 
->Na Linuxie możesz skorzystać z menedżera pakietów (np. `apt` na Ubuntu) lub pobrać instalator ze strony NVIDIA. 
->Pamiętaj, że na Linuxie może być konieczne ręczne zainstalowanie sterowników NVIDIA przed instalacją CUDA Toolkit. 
->Z naszego doświadczenia, na linuxie najlepiej jest użyć Ubuntu 22.04/24.04 LTS, które są szeroko wspierane przez NVIDIA i mają dobre wsparcie dla sterowników i narzędzi CUDA. Możesz na swoim Windowsie postawić Ubuntu 24.04 LTS, przez WSL (Windows Subsystem for Linux), co pozwoli Ci korzystać z narzędzi Linuxowych i jednocześnie mieć dostęp do GPU NVIDIA. Zazwyczaj GPU jest dostępna w WSL automatycznie w nowszych Windowsach. W przypadku braku automatycznej integracji, konfiguracja WSL z obsługą GPU może być nieco bardziej skomplikowana niż tradycyjna instalacja na natywnym Linuxie, ale jest to świetna opcja dla programistów, którzy chcą korzystać z obu środowisk, mimo wszystko. Tutaj [instrukcja](https://documentation.ubuntu.com/wsl/stable/howto/install-ubuntu-wsl2/) do postawienia Ubuntu 24.04 LTS przez WSL.
+2. Wybierz swój system operacyjny (Windows, Linux):
+    - **Windows**: Najprostszym sposobem w naszej opinii, jest skorzystanie z pakietu CUDA dla Windows, który zawiera wszystkie niezbędne komponenty, w tym sterowniki i narzędzia programistyczne. 
+    - **Linux**: Na Linuxie możesz skorzystać z menedżera pakietów (np. `apt` na Ubuntu) lub pobrać instalator ze strony NVIDIA.
+    
+        >Pamiętaj, że na Linuxie może być konieczne ręczne zainstalowanie sterowników NVIDIA przed instalacją CUDA Toolkit. 
+        
+        Z naszego doświadczenia, na linuxie najlepiej jest użyć Ubuntu 22.04/24.04 LTS, które są szeroko wspierane przez NVIDIA i mają dobre wsparcie dla sterowników i narzędzi CUDA. 
+
+        > Możesz na swoim Windowsie postawić Ubuntu 24.04 LTS, przez WSL (Windows Subsystem for Linux), co pozwoli Ci korzystać z narzędzi Linuxowych i jednocześnie mieć dostęp do GPU NVIDIA. Zazwyczaj GPU jest dostępna w WSL automatycznie w nowszych Windowsach. W przypadku braku automatycznej integracji, konfiguracja WSL z obsługą GPU może być nieco bardziej skomplikowana niż tradycyjna instalacja na natywnym Linuxie, ale jest to świetna opcja dla programistów, którzy chcą korzystać z obu środowisk, mimo wszystko. Tutaj [instrukcja](https://documentation.ubuntu.com/wsl/stable/howto/install-ubuntu-wsl2/) do postawienia Ubuntu 24.04 LTS przez WSL.
 3. Pobierz i zainstaluj:
-    - [Jeżeli nie są zainstalowane, jeżeli są, nie ruszaj!] Sterowniki NVIDIA (upewnij się, że są aktualne)
+    - [Jeżeli nie są zainstalowane, **jeżeli są, nie ruszaj!**] Sterowniki NVIDIA (upewnij się, że są aktualne)
     - CUDA Toolkit (zawiera kompilator nvcc, biblioteki, przykłady)
 
 📌 Po instalacji sprawdź wersję CUDA:
