@@ -3,6 +3,14 @@ title: CUDA - 10 tutoriali dla początkujących
 description: Podstawy programowania równoległego z użyciem CUDA
 author: Natan Jarzyński, Mikołaj Królak, Marek Kowalik
 
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  parse_block_html: true
+
+
+
 # Does not affect the theme, but can be used in your templates
 blog1_title: Ustawienie środowiska CUDA na Windowsie i Linuxie
 blog1_url: /blog1
