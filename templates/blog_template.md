@@ -50,8 +50,27 @@ Lorem ipsum.
 
 Podsumowanie i wnioski.
 
--------
 
+------------------------------
+<h2> Pytania kontrolne </h2>
+
+1. ...
+2. ...
+
+------------------------------
+<h2>Ćwiczenia:</h2>
+
+1. ...
+2. ...
+
+------------------------------
+<break></break>
+------------------------------
+<h2>Odpowiedzi do pytań kontrolnych:</h2>
+
+1. ...
+
+------------------------------
 <!-- Back to main page -->
 <p><a href="https://kowalikov.github.io/CUDA_blogs/">Strona główna</a></p>
 
