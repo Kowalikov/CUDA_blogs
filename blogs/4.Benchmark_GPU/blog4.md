@@ -387,19 +387,26 @@ W tym wpisie stworzyliśmy prosty program do benchmarku GPU, który mnoży dwie 
 ------------------------------
 <h2> Pytania kontrolne </h2>
 
-1. ...
+1. Jakiej funkcji używamy do zapisania znacznika czasu przed i po wykonaniu kernela na GPU? Jakiego typu danych używamy do przechowywania tych znaczników?
+2. Jak obliczamy różnicę czasu między dwoma znacznikami czasu na GPU, i w jakiej jednostce jest ona zwracana?
 
 ------------------------------
 <h2>Ćwiczenia:</h2>
 
-1. ...
+1. Uprość iloczyn, do iloczynu Hadamarda, czyli mnożenia każdego elementu z `A` przez odpowiadający mu element z `B`, bez sumowania. Np. element `c[1][3]`, będzie równy `a[1][3] * b[1][3]`. Zobacz jakie przyspieszenie daje GPU w porównaniu do CPU dla tej operacji, dla rozmiarów tablicy 10x10, 50x50, 500x500. Jakie przyspieszenie daje GPU dla mnożenia macierzy z sumowaniem, w porównaniu do mnożenia Hadamarda, dla tych samych rozmiarów tablic? Jak myślisz dlaczego?
+2. Rozszerz benchmark o mnożenie trzech macierzy, czyli `D = A * B * C`, ale dla iloczynu Hadamarda. Sprawdź jakie przyspieszenie daje GPU w porównaniu do CPU dla tej operacji, dla rozmiarów tablicy 10x10, 50x50, 500x500.
+3. Napisz benchmark dla mnożenia tablic 3 wymiarowych. Uprość iloczyn, do iloczynu Hadamarda, czyli np. element `c[1][3][0]`, będzie równy `a[1][3][0] * b[1][3][0]`. Skup się na eleganckim kodzie wykorzystując trój-wymiarową konfigurację bloków lub wątków. Pamiętaj o walidacji danych od użytkownika! Głównie żeby nie przekroczyć limitów GPU, zmniejsz maksymalny rozmiar tablic. Jakie przyspieszenie dla GPU mamym dla tablic 10x10x10, 20x20x20, 50x50x50, będzie tym razem? 
+
+> **UWAGA**: Przy mnożeniu macierzy z sumowaniem, celowo unikamy mnożenia trzech tablic w jednym kernelu. Dla efektywnej implementacji, potrzeba będzie współdzielenia danych między wątkami (głównie wynik `A * B`, przez użyciem go do pomnożenia przez `C`). Jest to do zrobienia z użyciem pamięci współdzielonej. Tą i innymi typami pamięci zajmiemy się w następnych wpisach. 
 
 ------------------------------
 <break></break>
 ------------------------------
 <h2>Odpowiedzi do pytań kontrolnych:</h2>
 
-1. ...
+1. Do zapisania punktu czasowego przed i po wykonaniu kernela na GPU używamy funkcji `cudaEventRecord()`. Do przechowywania tych znaczników używamy typu danych `cudaEvent_t`, który jest specjalnym typem danych w CUDA służącym do reprezentowania zdarzeń, które mogą być używane do synchronizacji i pomiaru czasu na GPU. Żeby zapisać punkt czasowy, tworzymy zdarzenie, inicjując zmienną typu `cudaEvent_t` i wywułując `cudaEventCreate` ze wskaźnikiem do tej zmiennej. Tworzymy dwie takie zmienne: `start` i `stop`. Następnie, przed wywołaniem kernela, wywołujemy `cudaEventRecord(start)`, a po kernelu `cudaEventRecord(stop)`.
+
+2. Po synchronizacji GPU, możemy obliczyć różnicę czasu między dwoma zdarzeniami za pomocą funkcji `cudaEventElapsedTime()`, która zwraca czas w milisekundach. Do wywołania jej, potrzebujemy zmiennej typu `float` do przechowania wyniku (przekazujemy jej wskaźnik), oraz dwóch zdarzeń (`start` i `stop`). Wywołujemy ją w ten sposób: `cudaEventElapsedTime(&gpuTime, start, stop)`.
 
 ------------------------------
 
