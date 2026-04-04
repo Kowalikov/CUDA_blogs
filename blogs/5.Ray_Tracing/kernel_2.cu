@@ -5,13 +5,127 @@
 #include <cmath>
 #include <cstdlib> // For system()
 
+// --------------------
+// VECTOR MATH HELPERS
+// --------------------
+
+__device__ float3 operator*(float b, const float3& a)
+{
+    return make_float3(a.x * b, a.y * b, a.z * b);
+}
+
+__device__ float3 operator+(const float3& a, const float3& b)
+{
+    return make_float3(a.x + b.x, a.y + b.y, a.z + b.z);
+}
+
+__device__ float3 operator-(const float3& a, const float3& b)
+{
+    return make_float3(a.x - b.x, a.y - b.y, a.z - b.z);
+}
+
+__device__ float3 operator*(const float3& a, float b)
+{
+    return make_float3(a.x * b, a.y * b, a.z * b);
+}
+
+__device__ float dot(const float3& a, const float3& b)
+{
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+__device__ float length(const float3& v)
+{
+    return sqrtf(dot(v, v));
+}
+
+__device__ float3 normalize(const float3& v)
+{
+    float len = length(v);
+    return make_float3(v.x / len, v.y / len, v.z / len);
+}
+
+__device__ float3 cross(float3 a, float3 b)
+{
+    return make_float3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+}
 
 // --------------------
 // CUDA KERNEL
 // --------------------
 __global__ void render(unsigned char* image, int width, int height, float3 lightDir, float3 rayOrigin, float3 center, float radius)
 {
-    // TODO: implement ray tracing logic to compute pixel colors based on sphere intersection and lighting
+    int x = blockIdx.x * blockDim.x + threadIdx.x;
+    int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (x >= width || y >= height)
+        return;
+
+    // 1. Calculate aspect ratio to fix image distortion
+    float aspect_ratio = (float)width / (float)height;
+
+    // 2. Map pixel coordinates (x,y) to 3D Viewport (u,v)
+    // 
+    // Correct 'u' for aspect ratio
+    float u = ((x + 0.5f) / width * 2.0f - 1.0f) * aspect_ratio;
+    // Invert 'v' so that y=0 is the top of the image
+    float v = -(y + 0.5f) / height * 2.0f + 1.0f;
+
+
+    // 3. Camera System (LookAt Logic)
+    // Forward vector: Direction from camera to the target (sphere center)
+    float3 forward = normalize(center - rayOrigin);
+
+    // Right vector: Perpendicular to Forward and World Up (0,1,0)
+    float3 worldUp = make_float3(0, 1, 0);
+    float3 right = normalize(cross(forward, worldUp));
+
+    // Up vector: Perpendicular to Right and Forward
+    float3 up = cross(right, forward);
+
+    // 4. Ray Direction
+    float fov_scale = 1.0f; // Zoom factor
+    float3 rayDir = normalize(forward + u * right * fov_scale + v * up * fov_scale);
+
+    // 5. Sphere Intersection (Quadratic Formula) (t*rayDir + L)^2 = r^2
+    float3 L = rayOrigin - center;
+    float a = dot(rayDir, rayDir); // Always 1.0 if normalized
+    float b = 2.0f * dot(L, rayDir);
+    float c = dot(L, L) - radius * radius;
+    float delta = b * b - 4.0f * a * c;
+
+    // Default background color (Dark Navy)
+    unsigned char red = 30, green = 30, blue = 50;
+
+    if (delta >= 0.0f)
+    {
+        // Calculate the nearest intersection distance 't'
+        float t = (-b - sqrtf(delta)) / (2.0f * a);
+
+        // Render only if the object is IN FRONT of the camera (t > 0)
+        if (t > 0.0f) {
+            float3 hit = rayOrigin + t * rayDir;
+            float3 normal = normalize(hit - center);
+
+            // Lighting calculation (Lambertian)
+            // Ensure light direction is normalized
+            lightDir = normalize(lightDir);
+
+            // Calculate intensity based on the angle between normal and light
+            float intensity = fmaxf(0.1f, dot(normal, lightDir));
+
+            red = (unsigned char)(255 * intensity);
+            green = (unsigned char)(50 * intensity);
+            blue = (unsigned char)(50 * intensity);
+        }
+    }
+
+    int idx = (y * width + x) * 3;
+
+    // Write final pixel color to Global Memory
+    image[idx + 0] = red;
+    image[idx + 1] = green;
+    image[idx + 2] = blue;
 }
 
 // --------------------
@@ -19,7 +133,22 @@ __global__ void render(unsigned char* image, int width, int height, float3 light
 // --------------------
 void savePPM(const char* filename, unsigned char* data, int width, int height)
 {
-    // TODO: implement PPM saving (P6 format)
+    // Open file in binary mode (crucial for performance and Windows compatibility)
+    std::ofstream file(filename, std::ios::binary);
+
+    if (!file.is_open()) {
+        std::cerr << "[ERROR] Could not open file for writing: " << filename << "\n";
+        std::cerr << "Hint: Does the 'frames' directory exist?\n";
+        return;
+    }
+
+    // P6 Header
+    file << "P6\n" << width << " " << height << "\n255\n";
+
+    // Fast binary dump of the memory buffer
+    file.write(reinterpret_cast<const char*>(data), width * height * 3);
+
+    file.close();
 }
 
 // --------------------

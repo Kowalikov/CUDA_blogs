@@ -31,181 +31,66 @@ permalink: /blog5
 -----------
 <h3> Render oświetlenia kuli z różnych stron </h3>
 
-W tym wpisie, użyjemy zdobytej wiedzy z poprzednich wpisów, żeby użyć GPU to stworzenia animacji prostej sceny 3D, z kulą oświetloną z różnych stron. Będzie to bardzo uproszczona wersja ray tracingu, ale pozwoli nam na praktyczne zastosowanie kerneli CUDA do renderowania grafiki - czyli tego, do czego GPU zostały stworzone.
+W tym wpisie, użyjemy zdobytej wiedzy z poprzednich wpisów, żeby użyć GPU to stworzenia animacji prostej sceny 3D, z kulą oświetloną z różnych stron. Będzie to bardzo uproszczona wersja ray tracingu, ale pozwoli nam na praktyczne zastosowanie kerneli CUDA do renderowania grafiki - czyli tego, do czego GPU zostały stworzone. Wszystkie wersje skryptu, które będziemy omawiać, są dostępne w [repozytorium GitHub](https://github.com/Kowalikov/CUDA_blogs/tree/main/blogs/5.Ray_Tracing).
 
 
 <h4>Setup renderowanego środowiska</h4>
 
 Do renderowania sceny, potrzebujemy zdefiniować kilka elementów:
-- układ współrzędnych, w którym będziemy pracować (kartezjański, z osią Y skierowaną do góry, osią X i Z rozpinającymi płaszczyznę poziomą)
-- tło, które potraktujemy jako bardzo odległą płaszczyznę, która będzie miała stały kolor ( blady granatowo-fioletowy, RGB(30, 30, 50))
-- kulę, która będzie umieszczona blisko centrum sceny na współrzędnych (0, 0, -3), i będzie miała promień 1 jednostki. Kula będzie miała kolor RGB(255, 50, 50) przy maksymalnym świetle. Będzie ona ciemnieć w zależności od kąta padania światła i odległości od źródła światła. Dla każdego piksela, będziemy operowali parametrem `intensity`, który będzie określał, jak jasny jest dany punkt na kuli, i będzie się wahał od 0 (czarny) do 1 (pełna jasność). Kolor piksela (jeżeli trafi na kulę) będzie wtedy obliczany jako `color = base_color * intensity`, gdzie `base_color` to właśnie kolor kuli RGB(255, 50, 50).
-- kamerę, która będzie umieszczona na współrzędnych (5, 0, -3) i będzie patrzeć na wprost na kulkę. Kamera będzie miała pole widzenia 90 stopni, co oznacza, że będzie widzieć obszar od -1 do 1 w osi X i Y na płaszczyźnie Z=0. Zasadniczo, odległość od kamery do najbliższego punktu na kuli będzie wynosić 5-1=4. To pozycja startowa. Będziemy animować kamerę, obracając ją wokół kuli, więc jej pozycja będzie się zmieniać w czasie. Kamera będzie poruszać się po okręgu o promieniu 5 jednostek wokół kuli, w płaszczyźnie XZ, ze stałą prędkością kątową. Chcemy mieć pełny obrót kamery na wszystkie klatki, więc jeśli mamy 120 klatek, przy 60 fpsach to kamera będzie obracać się o 360/120=3 stopnie na klatkę, i 260/120/60=180 stopni na sekundę. 
+- układ współrzędnych, w którym będziemy pracować (kartezjański, z osią Y skierowaną do góry,
+  osią X i Z rozpinającymi płaszczyznę poziomą)
+- tło, które potraktujemy jako bardzo odległą płaszczyznę, która będzie miała stały kolor 
+  (blady granatowo-fioletowy, RGB(30, 30, 50))
+- kulę, która będzie umieszczona blisko centrum sceny na współrzędnych (0, 0, -3), i będzie miała promień
+  1 jednostki. Kula będzie miała kolor RGB(255, 50, 50) przy maksymalnym świetle. Będzie ona ciemnieć 
+  w zależności od kąta padania światła i odległości od źródła światła. Dla każdego piksela, będziemy
+  operowali parametrem `intensity`, który będzie określał, jak jasny jest dany punkt na kuli, i będzie się
+  wahał od 0 (czarny) do 1 (pełna jasność). Kolor piksela (jeżeli trafi na kulę) będzie wtedy obliczany jako
+  `color = base_color * intensity`, gdzie `base_color` to właśnie kolor kuli RGB(255, 50, 50).
+- kamerę, która będzie umieszczona na współrzędnych (5, 0, -3) i będzie patrzeć na wprost na kulkę.
+  Kamera będzie miała pole widzenia 90 stopni, widząc obszar od `-1 * z` do `1 * z` w osi X i Y. Czyli efektywnie,
+  tuż przed kamerą, będziemy projektować wszystkie punkty w odległości `z_i` z ich współrzędnymi `x_i` i `y_i`
+  obliczanymi jako `x_i' = x_i / z_i` i `y_i' = y_i / z_i`. Polecam sprawdzić ten [filmik od Tsoding](https://www.youtube.com/watch?v=qjWkNZ0SXfo).
+  Najważniejsza informacja dla nas, to że odległość od kamery do najbliższego punktu na kuli będzie wynosić 5-1=4.
+  To pozycja startowa. Będziemy animować kamerę, obracając ją wokół kuli, więc jej pozycja będzie się zmieniać
+  w czasie. Kamera będzie poruszać się po okręgu o promieniu 5 jednostek wokół kuli, w płaszczyźnie XZ, 
+  ze stałą prędkością kątową. Chcemy mieć pełny obrót kamery na wszystkie klatki, więc jeśli mamy 120 klatek,
+  przy 60 fpsach to kamera będzie obracać się o 360/120=3 stopnie na klatkę, i 260/120/60=180 stopni na sekundę. 
+- źródło światła, które będzie umieszczone blisko kamery, na współrzędnych (0, 1.0, -3.05). 
+  Będzie to punktowe źródło światła, które będzie emitować światło we wszystkich kierunkach.
+  Jego pozycja jest blisko kuli, powyżej niej i lekko na bok, co oznacza, że będzie oświetlać kulę z góry, delikatnie asymetrycznie.
+  Światło będzie miało stałą jasność (`intensity`=1.0) i kolor (białe światło RGB(255, 255, 255)).
 
-Mamy podstawowe elementy sceny, teraz musimy je zaimplementować w kodzie. Będziemy używać kernela CUDA do renderowania każdego piksela obrazu, i będziemy generować serię klatek, klatka po klatce, w pętli `for`, które potem połączymy w animację. Zacznijmy od szkieletu maina.
+Mamy podstawowe elementy sceny, teraz musimy je zaimplementować w kodzie. Będziemy używać kernela
+CUDA do renderowania każdego piksela obrazu, i będziemy generować serię klatek, klatka po klatce,
+w pętli `for`, które potem połączymy w animację. Zacznijmy od szkieletu maina.
 
 <h4>Szkielet maina</h4>
 
-
+Pełen skrypt z tej części znajdziesz [tutaj](https://github.com/Kowalikov/CUDA_blogs/blob/main/blogs/5.Ray_Tracing/kernel_1.cu). 
+Zaczynamy od importów. Dzisiaj potrzebne nam: 
 
 <!-- make a code snippet in cpp -->
 ```cpp
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-#include <fstream>
-#include <iostream>
-#include <cmath>
-#include <cstdlib> // For system()
+#include <cuda_runtime.h> // zarządzanie pamięcią GPU i funkcje CUDA
+#include <device_launch_parameters.h> // identyfikatory bloków i wątków w kernelach
+#include <fstream> // zapisywanie klatek do plików
+#include <iostream> // logowanie postępu i informacji o scenie
+#include <cmath> // funkcje matematyczne (sqrt, atan2, sin, cos)
+#include <cstdlib> // komendy do tworzenia i usuwania folderów i plików
+```
 
-// --------------------
-// VECTOR MATH HELPERS
-// --------------------
+typy `float3` i funkcje wektorowe (dot, cross, normalize) są dostępne w `cuda_runtime.h`, więc nie musimy ich definiować sami.
 
-__device__ float3 operator*(float b, const float3& a)
-{
-    return make_float3(a.x * b, a.y * b, a.z * b);
-}
+Dalej zaczynamy od najważniejszych graficznych szczegółów sceny, czyli ilość klatek i rozdzielczość obrazu. 
+W tym przypadku, chcemy wygenerować 120 klatek animacji, w rozdzielczości 800x600 pikseli.
+Każdy piksel będzie reprezentowany przez 3 bajty (RGB), więc rozmiar pojedynczej klatki w bajtach to `width * height * 3`.
+Przy okazji, tworzymy folder `frames`, w którym będziemy zapisywać poszczególne klatki animacji. 
+Używamy do tego komendy systemowej `mkdir`, która jest kompatybilna z Windows. 
+Komenda `> nul 2>&1` przekierowuje standardowe wyjście i błędy do "czarnej dziury", więc nie zobaczymy komunikatu o błędzie,
+jeśli folder już istnieje.
 
-__device__ float3 operator+(const float3& a, const float3& b)
-{
-    return make_float3(a.x + b.x, a.y + b.y, a.z + b.z);
-}
-
-__device__ float3 operator-(const float3& a, const float3& b)
-{
-    return make_float3(a.x - b.x, a.y - b.y, a.z - b.z);
-}
-
-__device__ float3 operator*(const float3& a, float b)
-{
-    return make_float3(a.x * b, a.y * b, a.z * b);
-}
-
-__device__ float dot(const float3& a, const float3& b)
-{
-    return a.x * b.x + a.y * b.y + a.z * b.z;
-}
-
-__device__ float length(const float3& v)
-{
-    return sqrtf(dot(v, v));
-}
-
-__device__ float3 normalize(const float3& v)
-{
-    float len = length(v);
-    return make_float3(v.x / len, v.y / len, v.z / len);
-}
-
-__device__ float3 cross(float3 a, float3 b)
-{
-    return make_float3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
-}
-
-// --------------------
-// CUDA KERNEL
-// --------------------
-__global__ void render(unsigned char* image, int width, int height, float3 lightDir, float3 rayOrigin, float3 center, float radius)
-{
-    int x = blockIdx.x * blockDim.x + threadIdx.x;
-    int y = blockIdx.y * blockDim.y + threadIdx.y;
-
-    if (x >= width || y >= height)
-        return;
-
-    // 1. Calculate aspect ratio to fix image distortion
-    float aspect_ratio = (float)width / (float)height;
-
-    // 2. Map pixel coordinates (x,y) to 3D Viewport (u,v)
-    // 
-    // Correct 'u' for aspect ratio
-    float u = ((x + 0.5f) / width * 2.0f - 1.0f) * aspect_ratio;
-    // Invert 'v' so that y=0 is the top of the image
-    float v = -(y + 0.5f) / height * 2.0f + 1.0f;
-
-
-    // 3. Camera System (LookAt Logic)
-    // Forward vector: Direction from camera to the target (sphere center)
-    float3 forward = normalize(center - rayOrigin);
-
-    // Right vector: Perpendicular to Forward and World Up (0,1,0)
-    float3 worldUp = make_float3(0, 1, 0);
-    float3 right = normalize(cross(forward, worldUp));
-
-    // Up vector: Perpendicular to Right and Forward
-    float3 up = cross(right, forward);
-
-    // 4. Ray Direction
-    float fov_scale = 1.0f; // Zoom factor
-    float3 rayDir = normalize(forward + u * right * fov_scale + v * up * fov_scale);
-
-    // 5. Sphere Intersection (Quadratic Formula) (t*rayDir + L)^2 = r^2
-    float3 L = rayOrigin - center;
-    float a = dot(rayDir, rayDir); // Always 1.0 if normalized
-    float b = 2.0f * dot(L, rayDir);
-    float c = dot(L, L) - radius * radius;
-    float delta = b * b - 4.0f * a * c;
-
-    // Default background color (Dark Navy)
-    unsigned char red = 30, green = 30, blue = 50;
-
-    if (delta >= 0.0f)
-    {
-        // Calculate the nearest intersection distance 't'
-        float t = (-b - sqrtf(delta)) / (2.0f * a);
-
-        // Render only if the object is IN FRONT of the camera (t > 0)
-        if (t > 0.0f) {
-            float3 hit = rayOrigin + t * rayDir;
-            float3 normal = normalize(hit - center);
-
-            // Lighting calculation (Lambertian)
-            // Ensure light direction is normalized
-            lightDir = normalize(lightDir);
-
-            // Calculate intensity based on the angle between normal and light
-            float intensity = fmaxf(0.1f, dot(normal, lightDir));
-
-            red = (unsigned char)(255 * intensity);
-            green = (unsigned char)(50 * intensity);
-            blue = (unsigned char)(50 * intensity);
-        }
-    }
-
-    int idx = (y * width + x) * 3;
-
-    // Write final pixel color to Global Memory
-    image[idx + 0] = red;
-    image[idx + 1] = green;
-    image[idx + 2] = blue;
-}
-
-// --------------------
-// SAVE IMAGE (BINARY P6)
-// --------------------
-void savePPM(const char* filename, unsigned char* data, int width, int height)
-{
-    // Open file in binary mode (crucial for performance and Windows compatibility)
-    std::ofstream file(filename, std::ios::binary);
-
-    if (!file.is_open()) {
-        std::cerr << "[ERROR] Could not open file for writing: " << filename << "\n";
-        std::cerr << "Hint: Does the 'frames' directory exist?\n";
-        return;
-    }
-
-    // P6 Header
-    file << "P6\n" << width << " " << height << "\n255\n";
-
-    // Fast binary dump of the memory buffer
-    file.write(reinterpret_cast<const char*>(data), width * height * 3);
-
-    file.close();
-}
-
-// --------------------
-// MAIN APPLICATION
-// --------------------
+```cpp
 int main()
 {
     int frames_to_render = 120;
@@ -214,13 +99,19 @@ int main()
     const int height = 600;
     const int imageSize = width * height * 3;
 
+    // Setup working directory (create 'frames' folder if not exists)
+    // Windows command to create folder quietly
+    system("mkdir frames > nul 2>&1");
+```
+
+Dalej dodajmy dane kuli, światła i kamery, a następnie je wyświetlamy w stylizowanym nagłówku programu. 
+
+```cpp
     // --- SCENE CONFIGURATION ---
     float3 center = make_float3(0, 0, -3);
     float sphereRadius = 1.0f;
-
-    float3 lightDir = { 0, 0, 1.0f };
-    float x_cam, y_cam, z_cam;
-    float x_light, y_light, z_light;
+    float3 camPosition = make_float3(5.0f, 0, -3.0f);
+    float3 lightSource = make_float3(0, 1.0f, -3.05f);
 
     // Display Application Header
     std::cout << "========================================\n";
@@ -228,59 +119,100 @@ int main()
     std::cout << "========================================\n";
     std::cout << "Sphere: Center (" << center.x << ", " << center.y << ", " << center.z;
     std::cout << "), Radius " << sphereRadius << "\n";
+    std::cout << "Light position (" << lightSource.x << ", " << lightSource.y << ", " << lightSource.z << ")\n";
     std::cout << "System: Generating " << frames_to_render << " frames of ";
     std::cout << width << "x" << height << " resolution.\n";
     std::cout << "Output: frames/*.ppm -> output.mp4\n";
     std::cout << "----------------------------------------\n";
+```
 
-    // Setup working directory (create 'frames' folder if not exists)
-    // Windows command to create folder quietly
-    system("mkdir frames > nul 2>&1");
+Nasz układ sceny jest gotowy. Przygotujmy utilsy, które będą postawą obliczeń zmian,
+klatka po klatce. Całe wideo, ma być animacją obrotu kamery wokół kuli, więc
+musimy obliczyć, jak będzie się zmieniać pozycja kamery w czasie. W tym celu,
+będziemy pracować z okrągłą orbitą kamery wokół centrum kuli. Potrzebujemy do tego 
+promień orbity i początkowy kąt. Dalej, w każdej klatce, będziemy aktualizować kąt
+o stałą wartość, co spowoduje obrót kamery. Zaczynamy od dystansów na poziomej
+płaszczyźnie (dx i dz) między kamerą a środkiem kuli, i na ich podstawie 
+obliczamy promień i kąt startowy.
 
-    // User Input
-    std::cout << "Enter camera starting position (x, y, z): ";
-    // std::cin >> x_cam >> y_cam >> z_cam;
-    x_cam = 5.0f; y_cam = 0.0f; z_cam = -3.0f;
-
-    std::cout << "Enter light source position (x, y, z): ";
-    // std::cin >> x_light >> y_light >> z_light;
-    x_light = 0.0f; y_light = 1.0f; z_light = -3.05f;
-    lightDir = { x_light, y_light, z_light };
-
+```cpp
     // --- ORBIT CALCULATION ---
-    float dx = x_cam - center.x;
-    float dz = z_cam - center.z;
+    float dx = camPosition.x - center.x;
+    float dz = camPosition.z - center.z;
 
     // Calculate initial radius and angle based on user input
     float orbitRadius = sqrtf(dx * dx + dz * dz);
     float startAngle = atan2f(dx, dz);
+```
 
+Jesteśmy gotowi do renderowania. Najpierw, alokujemy pamięć na hosta (RAM) i na urządzeniu (GPU)
+dla obrazu, który będziemy renderować.
+
+```cpp
     // Memory Allocation
     unsigned char* h_image = new unsigned char[imageSize]; // Host
     unsigned char* d_image;
     cudaMalloc(&d_image, imageSize); // Device
+```
 
-    // Execution Configuration
-    // 32x16 = 512 threads per block (optimal for occupancy)
+Teraz zrównoleglenie dla renderowania pojedyńczej klatki. Każdy piksel obrazu będzie renderowany 
+przez jeden wątek GPU, więc musimy zdefiniować konfigurację bloków i siatki. Wątki zorganizujemy w bloki
+32x16, co daje 512 wątków na blok, co jest dość optymalne dla większości GPU, pod kątem szerokiego zrównoleglenia
+bez wąskich gardeł żyłowania GPU pod limity.  
+
+Bloki wątków to podstawa naszego zrównoleglenia. Pozostało nam spiąć bloki w siatkę, żeby każdy piksel
+obrazu miał swój wątek. Siatka będzie miała tyle bloków, ile potrzeba, żeby pokryć cały obraz. 
+
+```cpp
+    // Konfiguracja wykonania kernela
+    // 32x16 = 512 wątków na blok (dość optymalne obłożenie dla większości GPU)
     dim3 block(32, 16);
     dim3 grid((width + block.x - 1) / block.x, (height + block.y - 1) / block.y);
+```
 
+Przeanalizuj na spokojnie linijkę od definicji `grid`, żeby zrozumieć jej logikę. Nie spiesz się. 
+Niektóre wzory w programowaniu mogą wydawać się niepotrzebnie skomplikowane, zwłaszcza w przypadku dość 
+generycznych albo rutynowych operacji. Cóż, jest tak. Z tego powodu, daj sobie czasu na ich zrozumienie. 
+Dzięki temu, szybciej do nich przywykniesz i gruntownie zrozumiesz, co robi twój kod. 
+To prosta, chodź powolna droga, do zostania bardzo dobrym programistą.
+
+Zaczynamy pętlę! Renderujemy klatkę po klatce, przesuwając kamerę wokół kuli o stały kąt `angleStep`.
+Chcemy mieć pełen obrót kamery na dystansie wszystkich klatek, stąd wzór $2 \pi / n$ gdzie $n$ to 
+liczba klatek.
+
+Na początku ciała pętli, zawsze obliczamy aktualną pozycję kamery, na podstawie jej startowej pozycji i aktualnego kąta.
+Dalej, wywołujemy kernel, który renderuje aktualną klatkę, kopiujemy wynik z powrotem na hosta i zapisujemy klatkę do pliku.
+Kernel jeszcze nie jest napisany, ale na pewno będzie potrzebował:
+
+- tablicy z pikselami obrazu
+- rozmiarów obrazu
+- pozycji światła
+- aktualnej pozycji kamery
+- centrum kuli i jej promienia  
+
+Dalej, tradycyjnie, synchronizacja GPU, kopiowanie danych z powrotem na hosta
+i zapis klatki do pliku. Nazwa pliku będzie miała format `frame_XXX.ppm`, 
+gdzie `XXX` to numer klatki z zerami wiodącymi, co ułatwi późniejsze łączenie klatek w wideo.
+Wywołujemy jeszcze nie zaimplementowaną funkcję zapisu klatki `savePPM`, ale na pewno 
+użyje ona obrazu na hoście, wymiarów obrazu i nazwy pliku. Dodajmy na koniec log postępu.
+
+```cpp
     std::cout << "\nStarting rendering loop...\n";
 
     // --- RENDER LOOP ---
+    float angleStep = (2.0f * 3.14159f) / frames_to_render;
     for (int frame = 0; frame < frames_to_render; frame++) {
         // Calculate new camera angle (Full circle in 120 frames)
-        float angleStep = (2.0f * 3.14159f) / frames_to_render;
         float currentAngle = startAngle + (frame * angleStep);
 
         // Update Camera Position
         float3 currentCamPos;
         currentCamPos.x = center.x + orbitRadius * sinf(currentAngle);
-        currentCamPos.y = y_cam; // Maintain constant height
+        currentCamPos.y = camPosition.y; // Maintain constant height
         currentCamPos.z = center.z + orbitRadius * cosf(currentAngle);
 
         // Launch Kernel
-        render <<< grid, block >>> (d_image, width, height, lightDir, currentCamPos, center, sphereRadius);
+        render <<< grid, block >>> (d_image, width, height, lightSource, currentCamPos, center, sphereRadius);
         cudaDeviceSynchronize();
 
         // Copy back to Host
@@ -294,7 +226,14 @@ int main()
         // Progress Log
         if (frame % 10 == 0) std::cout << "Rendered frame " << frame << "/" << frames_to_render << "\n";
     }
+```
 
+Po udanym przebiegu pętli, będziemy mieli wszystkie klatki zapisane w folderze `frames`.
+Użyjemy na nich FFmpeg, z poziomu komendy w terminalu, żeby połączyć te klatki w animację MP4.
+
+Sprzątamy po sobie - usuwamy klatki, zwalniamy pamięć i kończymy program z komunikatem. 
+
+```cpp
     // FFmpeg Video Generation
     std::cout << "Rendering complete. Generating MP4...\n";
     system("ffmpeg -y -framerate 60 -i frames/frame_%03d.ppm -c:v libx264 -pix_fmt yuv420p output.mp4");
@@ -310,6 +249,8 @@ int main()
 }
 ```
 
+<h4>Szkielet maina</h4>
+
 
 <h4> 🔍 Podsumowanie</h4>
 
@@ -319,12 +260,18 @@ int main()
 <h2> Pytania kontrolne </h2>
 
 1. ...
-2. ...
+2. Co oznaczają argumenty i flagi od ffmpega? Jak zmienić framerate i nazwę pliku wynikowego?
+Jak zmienić kodek i format wyjściowy?
 
 ------------------------------
 <h2>Ćwiczenia:</h2>
 
-1. ...
+1. Dostosuj program, żeby użytkownik mógł wprowadzić pozycję kamery i źródła światła z klawiatury, zamiast mieć je na sztywno w kodzie. 
+   Upewnij się, że program nadal działa poprawnie z nowymi wartościami. Pobaw się zachowaniem outputu:  
+    (a) Czy zauważysz obrót, jeżeli światło będzie dokładnie nad kulą?
+    (b) Co się stanie, jeżeli światło będzie dokładnie z tyłu kamery?
+    (c) Co się stanie, jeżeli kamera będzie bliżej środka kuli, niż promień kuli (np. na współrzędnych (0, 0, -2))?
+    (d) Co się stanie jeżeli kamera będzie bardzo daleko od kuli (np. na współrzędnych (1'000'000, 0, -3))?
 2. ...
 
 ------------------------------
