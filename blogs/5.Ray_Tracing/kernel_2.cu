@@ -53,7 +53,7 @@ __device__ float3 cross(float3 a, float3 b)
 // --------------------
 // CUDA KERNEL
 // --------------------
-__global__ void render(unsigned char* image, int width, int height, float3 lightDir, float3 rayOrigin, float3 center, float radius)
+__global__ void render(unsigned char* image, int width, int height, float3 lightSource, float3 rayOrigin, float3 center, float radius)
 {
     int x = blockIdx.x * blockDim.x + threadIdx.x;
     int y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -109,10 +109,10 @@ __global__ void render(unsigned char* image, int width, int height, float3 light
 
             // Lighting calculation (Lambertian)
             // Ensure light direction is normalized
-            lightDir = normalize(lightDir);
+            lightSource = normalize(lightSource);
 
             // Calculate intensity based on the angle between normal and light
-            float intensity = fmaxf(0.1f, dot(normal, lightDir));
+            float intensity = fmaxf(0.1f, dot(normal, lightSource));
 
             red = (unsigned char)(255 * intensity);
             green = (unsigned char)(50 * intensity);

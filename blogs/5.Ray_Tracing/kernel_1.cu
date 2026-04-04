@@ -9,7 +9,7 @@
 // --------------------
 // CUDA KERNEL
 // --------------------
-__global__ void render(unsigned char* image, int width, int height, float3 lightDir, float3 rayOrigin, float3 center, float radius)
+__global__ void render(unsigned char* image, int width, int height, float3 lightSource, float3 rayOrigin, float3 center, float radius)
 {
     // TODO: implement ray tracing logic to compute pixel colors based on sphere intersection and lighting
 }
