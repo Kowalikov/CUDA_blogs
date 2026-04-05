@@ -35,7 +35,7 @@ int main()
 
     // Setup working directory (create 'frames' folder if not exists)
     // Windows command to create folder quietly
-    system("mkdir frames > nul 2>&1");
+    system("mkdir frames");
     
     // --- SCENE CONFIGURATION ---
     float3 center = make_float3(0, 0, -3);

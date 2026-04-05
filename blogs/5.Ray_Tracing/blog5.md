@@ -87,8 +87,6 @@ W tym przypadku, chcemy wygenerować 120 klatek animacji, w rozdzielczości 800x
 Każdy piksel będzie reprezentowany przez 3 bajty (RGB), więc rozmiar pojedynczej klatki w bajtach to `width * height * 3`.
 Przy okazji, tworzymy folder `frames`, w którym będziemy zapisywać poszczególne klatki animacji. 
 Używamy do tego komendy systemowej `mkdir`, która jest kompatybilna z Windows. 
-Komenda `> nul 2>&1` przekierowuje standardowe wyjście i błędy do "czarnej dziury", więc nie zobaczymy komunikatu o błędzie,
-jeśli folder już istnieje.
 
 ```cpp
 int main()
@@ -100,8 +98,7 @@ int main()
     const int imageSize = width * height * 3;
 
     // Setup working directory (create 'frames' folder if not exists)
-    // Windows command to create folder quietly
-    system("mkdir frames > nul 2>&1");
+    system("mkdir frames");
 ```
 
 Dalej dodajmy dane kuli, światła i kamery, a następnie je wyświetlamy w stylizowanym nagłówku programu. 
