@@ -1,9 +1,10 @@
 #include <cuda_runtime.h>
 #include <iostream>
+#include "include/savePPM.h"
 
 
-const int width = 400;
-const int height = 400;
+const int width = 300;
+const int height = 300;
 
 __global__
 void fillSurface(cudaSurfaceObject_t surface) {
@@ -13,8 +14,8 @@ void fillSurface(cudaSurfaceObject_t surface) {
     if (x >= width || y >= height) return;
 
     uchar4 color = make_uchar4(
-        (unsigned char)( (x) % 256),
-        (unsigned char)( (y) % 256),
+        (unsigned char)( (255 - abs(abs(x)%510 - 255))%256),
+        (unsigned char)( (255 - abs(abs(y)%510 - 255))%256),
         128,
         255
     );
@@ -38,8 +39,8 @@ int main()
     cudaSurfaceObject_t surfObj = 0;
     cudaCreateSurfaceObject(&surfObj, &resDesc);
 
-    dim3 block(16, 16);
-    dim3 grid((width + 15) / 16, (height + 15) / 16);
+    dim3 block(32, 32);
+    dim3 grid((width + block.x - 1) / block.x, (height + block.y - 1) / block.y);
 
     fillSurface<<<grid, block>>>(surfObj);
     cudaDeviceSynchronize();
@@ -57,13 +58,7 @@ int main()
         cudaMemcpyDeviceToHost
     );
 
-    // Write PPM
-    FILE* f = fopen("gradient.ppm", "w");
-    fprintf(f, "P3\n%d %d\n255\n", width, height);
-    for (int i = 0; i < width * height; i++) {
-        fprintf(f, "%d %d %d\n", host[i].x, host[i].y, host[i].z);
-    }
-    fclose(f);
+    savePPM("./gradient.ppm", host, width, height);
 
     delete[] host;
     cudaDestroySurfaceObject(surfObj);
