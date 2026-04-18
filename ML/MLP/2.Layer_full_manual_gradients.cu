@@ -111,7 +111,6 @@ public:
             std::uniform_real_distribution<float> dist(-1.0f/sqrt((float)i), 1.0f/sqrt((float)i));
 
             for (auto& x : weights) x = dist(gen);
-            for (auto& x : biases)  x = dist(gen);
         }
     
     // Forward pass through the operator () overload (no gradients calculation)

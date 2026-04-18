@@ -3,6 +3,7 @@
 #include <device_launch_parameters.h>   // Parametry uruchamiania kernela (np. blockIdx, threadIdx)
 #include <chrono> //bilioteka do mierzenia czasu w C++
 
+
 void squareCPU(long long int* x, int size) {
     for (int i = 0; i < size; ++i)
         x[i] = x[i] * x[i];
